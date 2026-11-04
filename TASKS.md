@@ -1,6 +1,6 @@
 # BackendMasters — Tasks
 
-Status: **Phase 1 complete. Phase 2 not started.** Check off items only once verified.
+Status: **Phases 1 and 2 complete. Phase 3 not started.** Check off items only once verified.
 
 ## Phase 0 — Planning
 
@@ -25,20 +25,20 @@ Status: **Phase 1 complete. Phase 2 not started.** Check off items only once ver
 
 ## Phase 2 — Design system and public shell
 
-- [ ] Replace the Phase 1 placeholder page
-- [ ] Theme provider and switcher
-- [ ] Illustration primitives (`Node`, `Wire`, `Packet`)
-- [ ] Ten illustrations in `components/illustrations/`
-- [ ] Navigation (desktop, animated mobile)
-- [ ] Footer
-- [ ] Homepage: animated hero
-- [ ] Homepage: categories
-- [ ] Homepage: featured and latest articles (typed data interface, honest empty states)
-- [ ] Homepage: interview preparation
-- [ ] Category pages: `/learn`, `/dsa`, `/lld`, `/hld`, `/system-design`, `/aws`, `/observability`, `/backend-engineering`, `/interview-questions`
-- [ ] `/about`
-- [ ] Page transitions and skeletons
-- [ ] Responsive, theme and reduced-motion checks
+- [x] Replace the Phase 1 placeholder page
+- [x] Theme provider and switcher
+- [x] Illustration primitives (`Node`, `Wire`, `Packet`)
+- [x] Twelve illustrations in `components/illustrations/`
+- [x] Navigation (desktop, animated mobile)
+- [x] Footer
+- [x] Homepage: animated hero
+- [x] Homepage: categories
+- [x] Homepage: featured and latest articles (typed data interface, honest empty states)
+- [x] Homepage: interview preparation
+- [x] Category pages: `/learn`, `/dsa`, `/lld`, `/hld`, `/system-design`, `/aws`, `/observability`, `/backend-engineering`, `/interview-questions`
+- [x] `/about`
+- [x] Page transitions and skeletons
+- [x] Responsive, theme and reduced-motion checks
 
 ## Phase 3 — Database and API
 
@@ -47,7 +47,7 @@ Status: **Phase 1 complete. Phase 2 not started.** Check off items only once ver
 - [ ] Row Level Security policies and tests
 - [ ] Categories seed
 - [ ] NestJS modules: articles, categories, tags
-- [ ] Web API client and connected pages
+- [ ] Web API client and connected pages (replace the stubs in `features/articles/queries.ts`)
 
 ## Phase 4 — Articles
 
@@ -81,9 +81,10 @@ Status: **Phase 1 complete. Phase 2 not started.** Check off items only once ver
 
 ## Phase 7 — Launch
 
-- [ ] Global search, suggestions, category and tag filters
+- [ ] Global search, suggestions, category and tag filters (replace the `/search` holding page)
 - [ ] Metadata, canonical URLs, Open Graph
 - [ ] Sitemap, robots.txt, Article and Breadcrumb structured data
 - [ ] Full test pass
+- [ ] Contact address on `/about` and in the footer, if you want one beyond social links
 - [ ] Core Web Vitals and bundle budget
 - [ ] Deploy web and API, configure backendmasters.in

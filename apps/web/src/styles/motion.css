@@ -1,0 +1,232 @@
+/*
+ * BackendMasters motion system. Rules: docs/DESIGN_SYSTEM.md section 6.
+ * Everything that moves is inside a no-preference query, so reduced motion gets the
+ * resting state of each element: complete diagrams with no travelling packets.
+ */
+
+/* Resting states */
+.bm-packet {
+  fill: none;
+  stroke: var(--brand-signal);
+  stroke-linecap: round;
+  stroke-dasharray: 4 200;
+  stroke-dashoffset: 4;
+  opacity: 0;
+}
+.bm-flash,
+.bm-step {
+  opacity: 0;
+}
+.bm-grow {
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+.bm-draw {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+}
+
+.bm-hero-grid {
+  --grid-line: color-mix(in srgb, var(--foreground) 7%, transparent);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+.bm-hero-mask {
+  mask-image: radial-gradient(ellipse 75% 70% at 62% 42%, black 25%, transparent 78%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Illustrations run while their card is hovered or focused, or inside .bm-live. */
+  .bm-live .bm-packet,
+  .group:hover .bm-packet,
+  .group:focus-visible .bm-packet {
+    animation: bm-travel var(--bm-cycle, 3s) linear var(--bm-delay, 0s) infinite;
+  }
+  .bm-live .bm-packet-hero {
+    animation-name: bm-travel-hero;
+    animation-duration: var(--bm-cycle, 9s);
+  }
+  .bm-live .bm-flash {
+    animation: bm-flash var(--bm-cycle, 9s) linear var(--bm-delay, 0s) infinite;
+  }
+  .bm-live .bm-step,
+  .group:hover .bm-step,
+  .group:focus-visible .bm-step {
+    animation: bm-step var(--bm-cycle, 3.2s) linear var(--bm-delay, 0s) infinite;
+  }
+  .bm-live .bm-draw,
+  .group:hover .bm-draw,
+  .group:focus-visible .bm-draw {
+    animation: bm-draw 900ms var(--ease-out) var(--bm-delay, 0s) both;
+  }
+  .bm-live .bm-grow,
+  .group:hover .bm-grow,
+  .group:focus-visible .bm-grow {
+    animation: bm-grow 700ms var(--ease-out) var(--bm-delay, 0s) both;
+  }
+
+  /* Hold everything while the scene is offscreen. */
+  [data-inview='false'] * {
+    animation-play-state: paused !important;
+  }
+
+  .bm-hero-grid {
+    animation: bm-grid-drift 24s linear infinite;
+    will-change: transform;
+  }
+
+  /* Page load entrance. The heading never starts transparent, so LCP isn't delayed. */
+  .bm-enter {
+    animation: bm-enter var(--motion-slow) var(--ease-out) calc(var(--i, 0) * 70ms) both;
+  }
+  .bm-enter-heading {
+    animation: bm-enter-heading var(--motion-slow) var(--ease-out) both;
+  }
+
+  /* Scroll reveal with no JavaScript. Older browsers simply show the content. */
+  @supports (animation-timeline: view()) {
+    .bm-reveal {
+      animation: bm-reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 28%;
+    }
+  }
+
+  .bm-rail-packet {
+    animation: bm-rail 5s var(--ease-in-out) infinite;
+  }
+
+  /* Page transitions: a short crossfade, leaving the header and footer in place. */
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: var(--motion-base);
+  }
+}
+
+@media print {
+  .bm-reveal {
+    animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+@keyframes bm-travel {
+  0% {
+    stroke-dashoffset: 4;
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  30% {
+    stroke-dashoffset: -100;
+    opacity: 1;
+  }
+  33%,
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}
+@keyframes bm-travel-hero {
+  0% {
+    stroke-dashoffset: 4;
+    opacity: 0;
+  }
+  1% {
+    opacity: 1;
+  }
+  10% {
+    stroke-dashoffset: -100;
+    opacity: 1;
+  }
+  11%,
+  100% {
+    stroke-dashoffset: -100;
+    opacity: 0;
+  }
+}
+@keyframes bm-flash {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  2% {
+    opacity: 1;
+  }
+  12% {
+    opacity: 0;
+  }
+}
+@keyframes bm-step {
+  0% {
+    opacity: 0;
+  }
+  4%,
+  24% {
+    opacity: 1;
+  }
+  30%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes bm-draw {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes bm-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes bm-grid-drift {
+  to {
+    transform: translate3d(48px, 48px, 0);
+  }
+}
+@keyframes bm-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes bm-enter-heading {
+  from {
+    transform: translateY(8px);
+  }
+}
+@keyframes bm-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+@keyframes bm-rail {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}

@@ -87,17 +87,27 @@ A single soft green accent glow is allowed behind the hero. That's the whole gra
 
 The brief lists seven tools and also says to choose the lightest fit. This is how we reconcile that:
 
-| Tool                        | Status                       | Scope                                                                                  |
-| --------------------------- | ---------------------------- | -------------------------------------------------------------------------------------- |
-| **CSS + SVG**               | Default, no JS               | Hover, packets, grids, ambient hero, category illustrations, skeletons                 |
-| **Motion** (`motion/react`) | Phase 2, client islands only | Mobile nav, search modal, nav indicator, staggered reveals                             |
-| **View Transitions API**    | Phase 2                      | Page transitions, no library                                                           |
-| **Mermaid**                 | Phase 4, dynamic import      | Only loaded on articles containing a diagram                                           |
-| **React Flow**              | Phase 6, dynamic import      | Only on interactive architecture explorers                                             |
-| **GSAP**                    | Not installed until needed   | Added only if a scroll-story explainer can't be done with Motion                       |
-| **Lottie**                  | Not planned                  | Would need external After Effects assets; SVG/CSS covers small loaders at lower weight |
+| Tool                         | Status                     | Scope                                                                                                                |
+| ---------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **CSS + SVG**                | Default, no JS             | Hover, packets, grids, ambient hero, category illustrations, skeletons                                               |
+| **Motion** (`motion/react`)  | Not installed yet          | Everything in Phase 2 was achievable without it. Add it in Phase 6 if an explainer needs gesture or layout animation |
+| **React `<ViewTransition>`** | Live                       | Page crossfades, with no extra library. Browsers without support swap instantly                                      |
+| **Mermaid**                  | Phase 4, dynamic import    | Only loaded on articles containing a diagram                                                                         |
+| **React Flow**               | Phase 6, dynamic import    | Only on interactive architecture explorers                                                                           |
+| **GSAP**                     | Not installed until needed | Added only if a scroll-story explainer can't be done with Motion                                                     |
+| **Lottie**                   | Not planned                | Would need external After Effects assets; SVG/CSS covers small loaders at lower weight                               |
 
-**Targets:** LCP < 2.5s, INP < 200ms, CLS < 0.1 on mid-range mobile. Homepage first-load JS under 150 KB, checked in Phase 7.
+**Targets:** LCP < 2.5s, INP < 200ms, CLS < 0.1 on mid-range mobile. First-load JS: React and Next take about 116 KB of it on their own, so the budget is **under 170 KB compressed in total**. Own code stays small by rendering on the server and loading heavy pieces on demand (the mobile menu dialog loads on first use).
+
+**Measured at the end of Phase 2** (production build, 375px, 4x CPU throttle, slow 4G, empty cache): LCP 0.7 to 1.2s, CLS 0, under 5ms of blocking time.
+
+### How the system works
+
+- `src/styles/motion.css` holds all keyframes, inside a `no-preference` query, so reduced motion needs no extra code.
+- Illustrations run while a parent `.group` is hovered or focused, or inside `.bm-live`.
+- `<InView>` pauses a scene that's offscreen.
+- `.bm-reveal` is a scroll reveal in pure CSS (`animation-timeline: view()`). Browsers without support show the content straight away, and full-page screenshot tools show these sections blank because nothing has scrolled into view.
+- Packets are short dashes moving along the same path as their wire, using `stroke-dashoffset`.
 
 ### Hero: the distributed system
 
@@ -111,7 +121,7 @@ The brief's particles and floating symbols are treated as optional. They're adde
 
 ### Illustration library
 
-`apps/web/src/components/illustrations/`: `Dsa`, `Lld`, `Hld`, `Aws`, `Observability`, `SystemDesign`, `DistributedSystems`, `Database`, `Kafka`, `Api`. All share primitives (`Node`, `Wire`, `Packet`), use `currentColor` and tokens so both themes work, and animate on card hover or when in view.
+`apps/web/src/components/illustrations/`: `Dsa`, `Lld`, `Hld`, `Aws`, `Observability`, `SystemDesign`, `Backend`, `Interview`, `DistributedSystems`, `Database`, `Kafka`, `Api`. All share primitives (`Node`, `Wire`, `Packet`), use `currentColor` and tokens so both themes work, and animate on card hover or when in view.
 
 | Category            | Visual identity                                            |
 | ------------------- | ---------------------------------------------------------- |

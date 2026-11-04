@@ -1,0 +1,315 @@
+import type { CategorySlug } from '@backendmasters/shared';
+import {
+  Binary,
+  ClipboardCheck,
+  Cloud,
+  Component,
+  Gauge,
+  Network,
+  Server,
+  Waypoints,
+  type LucideIcon,
+} from 'lucide-react';
+
+export interface Category {
+  slug: CategorySlug;
+  href: `/${string}`;
+  /** Name on cards and in navigation. */
+  name: string;
+  /** Page heading. */
+  title: string;
+  icon: LucideIcon;
+  description: string;
+  lede: string;
+  topicsTitle: string;
+  topics: readonly string[];
+  anatomyTitle: string;
+  anatomy: readonly string[];
+  related: readonly CategorySlug[];
+}
+
+const SYSTEM_DESIGN_ANATOMY = [
+  'Problem statement',
+  'Functional requirements',
+  'Non-functional requirements',
+  'Architecture diagram',
+  'API design',
+  'Database design',
+  'Component explanation',
+  'Scaling strategy',
+  'Bottlenecks',
+  'Trade-offs',
+] as const;
+
+export const CATEGORIES: readonly Category[] = [
+  {
+    slug: 'dsa',
+    href: '/dsa',
+    name: 'DSA & Algorithms',
+    title: 'Data Structures & Algorithms',
+    icon: Binary,
+    description: 'Patterns that make hard problems familiar, from brute force to optimal.',
+    lede: 'Learn to recognise the pattern behind a problem, not memorise its answer. Each problem moves from the obvious solution to the optimal one, with a dry run you can follow.',
+    topicsTitle: 'Topics',
+    topics: [
+      'Arrays',
+      'Strings',
+      'Hash Maps',
+      'Linked Lists',
+      'Stacks',
+      'Queues',
+      'Trees',
+      'Binary Search Trees',
+      'Graphs',
+      'Heaps',
+      'Sorting',
+      'Searching',
+      'Dynamic Programming',
+      'Recursion',
+      'Backtracking',
+      'Sliding Window',
+      'Two Pointers',
+    ],
+    anatomyTitle: 'Every problem covers',
+    anatomy: [
+      'Problem statement',
+      'Examples and constraints',
+      'Brute-force approach',
+      'Optimized approach',
+      'Explanation',
+      'Time and space complexity',
+      'Dry run',
+      'Code in JavaScript, TypeScript, Java and Go',
+    ],
+    related: ['lld', 'interview-questions'],
+  },
+  {
+    slug: 'lld',
+    href: '/lld',
+    name: 'Low-Level Design',
+    title: 'Low-Level Design',
+    icon: Component,
+    description: 'Turn requirements into clean classes, relationships and patterns.',
+    lede: 'Good object design is what keeps a codebase changeable. Start with the principles, then apply them to the machine-coding problems interviewers actually ask.',
+    topicsTitle: 'Topics',
+    topics: [
+      'SOLID principles',
+      'OOP concepts',
+      'Design patterns',
+      'UML diagrams',
+      'Class diagrams',
+      'Parking Lot',
+      'Elevator System',
+      'Splitwise',
+      'Notification System',
+      'Payment System',
+    ],
+    anatomyTitle: 'Every design covers',
+    anatomy: [
+      'Requirements',
+      'Core entities',
+      'Class diagram',
+      'Relationships and responsibilities',
+      'Patterns applied, and why',
+      'Implementation',
+      'Extensibility and trade-offs',
+    ],
+    related: ['hld', 'dsa'],
+  },
+  {
+    slug: 'hld',
+    href: '/hld',
+    name: 'High-Level Design',
+    title: 'High-Level Design',
+    icon: Network,
+    description: 'The building blocks of large systems, and when each one earns its place.',
+    lede: 'Load balancers, caches, queues and shards are the vocabulary of system design. Learn what each one does, what it costs you, and when you are better off without it.',
+    topicsTitle: 'Building blocks',
+    topics: [
+      'Load balancing',
+      'API Gateway',
+      'Caching',
+      'Database sharding',
+      'Replication',
+      'Message queues',
+      'Kafka',
+      'Redis',
+      'Rate limiting',
+      'Distributed locking',
+      'Microservices',
+      'Event-driven architecture',
+    ],
+    anatomyTitle: 'Every article covers',
+    anatomy: SYSTEM_DESIGN_ANATOMY,
+    related: ['system-design', 'aws'],
+  },
+  {
+    slug: 'system-design',
+    href: '/system-design',
+    name: 'System Design',
+    title: 'System Design',
+    icon: Waypoints,
+    description: 'End-to-end case studies, from requirements to bottlenecks and trade-offs.',
+    lede: 'See the building blocks work together. Each case study starts from requirements and ends with an architecture you could defend in an interview or a design review.',
+    topicsTitle: 'Case studies',
+    topics: [
+      'URL shortener',
+      'Rate limiter',
+      'News feed',
+      'Chat system',
+      'Notification service',
+      'Search autocomplete',
+      'File storage',
+      'Video streaming',
+      'Ride sharing',
+      'Payment processing',
+    ],
+    anatomyTitle: 'Every case study covers',
+    anatomy: SYSTEM_DESIGN_ANATOMY,
+    related: ['hld', 'observability'],
+  },
+  {
+    slug: 'aws',
+    href: '/aws',
+    name: 'AWS & Cloud',
+    title: 'AWS & Cloud Engineering',
+    icon: Cloud,
+    description: 'Core AWS services explained through the architectures they belong in.',
+    lede: 'Skip the service catalogue. Learn which AWS services fit which problems, how they connect, and where the limits and costs catch teams out.',
+    topicsTitle: 'Services and tools',
+    topics: [
+      'Lambda',
+      'EC2',
+      'ECS',
+      'S3',
+      'SQS',
+      'SNS',
+      'API Gateway',
+      'DynamoDB',
+      'RDS',
+      'CloudWatch',
+      'IAM',
+      'Terraform',
+    ],
+    anatomyTitle: 'Every guide covers',
+    anatomy: [
+      'What it is and when to use it',
+      'Architecture diagram',
+      'Practical example',
+      'Infrastructure as code',
+      'Limits and cost',
+      'Failure modes',
+    ],
+    related: ['observability', 'hld'],
+  },
+  {
+    slug: 'observability',
+    href: '/observability',
+    name: 'Observability',
+    title: 'Observability & Monitoring',
+    icon: Gauge,
+    description: 'Logs, metrics and traces that tell you what production is really doing.',
+    lede: 'A system you cannot see is a system you cannot run. Learn to instrument services, set objectives that matter, and find the cause of an incident quickly.',
+    topicsTitle: 'Topics',
+    topics: [
+      'Logs',
+      'Metrics',
+      'Distributed tracing',
+      'OpenTelemetry',
+      'Prometheus',
+      'Grafana',
+      'New Relic',
+      'Alerting',
+      'SLI, SLO, SLA',
+      'Incident management',
+    ],
+    anatomyTitle: 'Every guide covers',
+    anatomy: [
+      'The core concept',
+      'Why it matters in production',
+      'Practical example',
+      'Architecture diagram',
+      'What to alert on',
+      'Common mistakes',
+    ],
+    related: ['aws', 'backend-engineering'],
+  },
+  {
+    slug: 'backend-engineering',
+    href: '/backend-engineering',
+    name: 'Backend Engineering',
+    title: 'Backend Engineering',
+    icon: Server,
+    description: 'Practical tutorials on the APIs, databases and jobs behind real products.',
+    lede: 'The everyday craft of backend work: APIs that hold up, queries that stay fast, and jobs that are safe to retry. Written for code that has to survive production.',
+    topicsTitle: 'Topics',
+    topics: [
+      'REST API design',
+      'Authentication and authorization',
+      'Database indexing',
+      'Transactions and isolation',
+      'Connection pooling',
+      'Background jobs',
+      'Idempotency',
+      'Error handling',
+      'API versioning',
+      'Testing strategy',
+      'Security fundamentals',
+      'Performance profiling',
+    ],
+    anatomyTitle: 'Every tutorial covers',
+    anatomy: [
+      'The problem',
+      'The core concept',
+      'Working code',
+      'Failure modes',
+      'How to test it',
+      'Production checklist',
+    ],
+    related: ['system-design', 'observability'],
+  },
+  {
+    slug: 'interview-questions',
+    href: '/interview-questions',
+    name: 'Interview Preparation',
+    title: 'Interview Questions',
+    icon: ClipboardCheck,
+    description: 'The most asked questions, with short answers and deeper explanations.',
+    lede: 'Answer the way a senior engineer would: a clear short answer first, then the reasoning and a practical example to back it up.',
+    topicsTitle: 'Question banks',
+    topics: [
+      'Node.js',
+      'JavaScript',
+      'TypeScript',
+      'Golang',
+      'Java',
+      'AWS',
+      'System Design',
+      'Database',
+    ],
+    anatomyTitle: 'Every question covers',
+    anatomy: [
+      'The question',
+      'Short answer',
+      'Detailed explanation',
+      'Practical example',
+      'Code example, where it helps',
+      'Related questions',
+    ],
+    related: ['dsa', 'system-design'],
+  },
+];
+
+export function getCategory(slug: CategorySlug): Category {
+  const category = CATEGORIES.find((candidate) => candidate.slug === slug);
+  if (!category) throw new Error(`Unknown category: ${slug}`);
+  return category;
+}
+
+/** Stable anchor for a topic, e.g. "Node.js" becomes "node-js". */
+export function topicAnchor(topic: string): string {
+  return topic
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
