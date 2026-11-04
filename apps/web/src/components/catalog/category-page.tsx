@@ -6,6 +6,7 @@ import type { CategorySlug } from '@backendmasters/shared';
 import { CATEGORY_ILLUSTRATIONS } from '@/components/illustrations';
 import { ArticleGridSkeleton } from '@/features/articles/components/article-card';
 import { ArticleGrid } from '@/features/articles/components/article-grid';
+import { ArticlesUnavailable } from '@/features/articles/components/articles-unavailable';
 import { getArticlesByCategory } from '@/features/articles/queries';
 import { getCategory, topicAnchor } from '@/features/catalog/categories';
 import { PageHeader } from './page-header';
@@ -117,6 +118,14 @@ export function CategoryPage({ slug }: { slug: CategorySlug }) {
 
 async function CategoryArticles({ slug }: { slug: CategorySlug }) {
   const articles = await getArticlesByCategory(slug);
+
+  if (articles === null) {
+    return (
+      <div className="mx-auto w-full max-w-7xl px-4 pb-14 sm:px-6">
+        <ArticlesUnavailable />
+      </div>
+    );
+  }
 
   if (articles.length === 0) {
     return (

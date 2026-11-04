@@ -5,3 +5,4 @@ dist
 coverage
 package-lock.json
 supabase/.temp
+apps/api/src/supabase/database.types.ts

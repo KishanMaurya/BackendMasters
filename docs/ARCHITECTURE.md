@@ -84,7 +84,7 @@ Defence in depth for admin writes: `AdminGuard` rejects non-admins in the API, a
 
 The secret key is never given a `NEXT_PUBLIC_` name and is never set on the Vercel project at all.
 
-### Planned schema (Phase 3)
+### Schema
 
 ```mermaid
 erDiagram
@@ -99,7 +99,15 @@ erDiagram
   categories ||--o{ dsa_problems : groups
 ```
 
-All tables use UUID primary keys, `created_at` / `updated_at` with a shared trigger, and unique slugs. `dsa_problems` holds per-language solutions (JavaScript, TypeScript, Java, Go) as validated JSONB, since they're always read together with the problem.
+Defined in `supabase/migrations`. Three rules are worth knowing before changing it:
+
+- **Default privileges are revoked.** Supabase's blanket table grants are removed and each privilege is granted explicitly, so a new table needs its own grants and policies.
+- **Roles can't be self-assigned.** `profiles.role` has no read or write grant for ordinary users, and is ignored in sign-up metadata. Only SQL with elevated rights can make someone an admin. `is_admin()` is the only way policies check it.
+- **Scheduled content stays hidden.** Public reads need `status = 'published' and published_at <= now()`, so a future date works as scheduling.
+
+`category_summaries` is a `security_invoker` view, so RLS still applies to whoever queries it.
+
+All tables use UUID primary keys (`article_tags` uses its two foreign keys), `created_at` / `updated_at` with a shared trigger, and unique slugs. `dsa_problems` holds per-language solutions (JavaScript, TypeScript, Java, Go) as validated JSONB, since they're always read together with the problem.
 
 ## 5. API conventions
 
@@ -109,21 +117,31 @@ All tables use UUID primary keys, `created_at` / `updated_at` with a shared trig
 - Error: `{ "error": { "code": "...", "message": "...", "details": ... }, "meta": { ... } }`.
 - Envelope types live in `packages/shared`, so the web client and the API can't drift apart.
 
-## 6. Architectural risks
+## 6. Testing the data layer
 
-| Risk                                                     | Impact                                                                                              | Mitigation                                                                                                                                                                   |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **The API is down during a Vercel build**                | Failed deploy if prerendering depends on it                                                         | `generateStaticParams` tolerates failure and pages fall back to on-demand rendering. Verify in Phase 4, along with crawlers receiving full article HTML for streamed routes. |
-| **Cold starts on a low-cost API host**                   | Slow first ISR render                                                                               | Choose an always-on host. Vercel's cache means readers rarely hit the API directly.                                                                                          |
-| **Latency between regions**                              | Every API call pays it                                                                              | Put the API and Supabase in the same region (Mumbai, `ap-south-1`, suits a `.in` audience).                                                                                  |
-| **Animation scope vs Core Web Vitals**                   | The brief lists GSAP, Motion, Lottie and React Flow, and loading all of them would hurt LCP and INP | Per-library budget, lazy loading, reduced-motion fallbacks (see `DESIGN_SYSTEM.md`).                                                                                         |
-| **Phase 2 builds pages before Phase 3 creates the data** | Temptation to hardcode mock articles                                                                | Phase 2 uses real category config and honest empty states behind a typed data interface. No fixture articles ship.                                                           |
-| **`/hld` and `/system-design` overlap**                  | Duplicate content, split SEO                                                                        | `/hld` covers building blocks (caching, sharding). `/system-design` covers end-to-end case studies. Articles link across.                                                    |
-| **Platform launches empty**                              | SEO and design both need real content                                                               | Content is a workstream of its own. See the open questions in `IMPLEMENTATION_PLAN.md`.                                                                                      |
-| **Page transitions in the App Router**                   | `AnimatePresence` exit animations are unreliable across route changes                               | Use the browser View Transitions API with graceful fallback. Test in Phase 2.                                                                                                |
-| **New major versions** (Nest 12, Next 16, TS 6)          | Examples online may be outdated                                                                     | Generated from the official scaffolds; exact versions committed through the lockfile.                                                                                        |
+| Command            | Needs                                 | Proves                                        |
+| ------------------ | ------------------------------------- | --------------------------------------------- |
+| `npm run db:test`  | Local Supabase                        | 35 pgTAP tests of who can read and write what |
+| `npm run test:db`  | Local Supabase, seed, `apps/api/.env` | The real API against the real database        |
+| `npm run test:e2e` | Nothing                               | HTTP behaviour with repositories faked        |
 
-## 7. Deployment
+The pgTAP suite was mutation-tested: exposing drafts, granting role updates and disabling RLS on a table each made it fail.
+
+## 7. Architectural risks
+
+| Risk                                                     | Impact                                                                                              | Mitigation                                                                                                                                                                                                               |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **The API is down during a Vercel build**                | Failed deploy if prerendering depends on it                                                         | Tested: the build succeeds, pages say articles can't be loaded, and that result expires in about a minute so the site recovers without a redeploy. Crawlers receiving full article HTML still needs checking in Phase 4. |
+| **Cold starts on a low-cost API host**                   | Slow first ISR render                                                                               | Choose an always-on host. Vercel's cache means readers rarely hit the API directly.                                                                                                                                      |
+| **Latency between regions**                              | Every API call pays it                                                                              | Put the API and Supabase in the same region (Mumbai, `ap-south-1`, suits a `.in` audience).                                                                                                                              |
+| **Animation scope vs Core Web Vitals**                   | The brief lists GSAP, Motion, Lottie and React Flow, and loading all of them would hurt LCP and INP | Per-library budget, lazy loading, reduced-motion fallbacks (see `DESIGN_SYSTEM.md`).                                                                                                                                     |
+| **Phase 2 builds pages before Phase 3 creates the data** | Temptation to hardcode mock articles                                                                | Phase 2 uses real category config and honest empty states behind a typed data interface. No fixture articles ship.                                                                                                       |
+| **`/hld` and `/system-design` overlap**                  | Duplicate content, split SEO                                                                        | `/hld` covers building blocks (caching, sharding). `/system-design` covers end-to-end case studies. Articles link across.                                                                                                |
+| **Platform launches empty**                              | SEO and design both need real content                                                               | Content is a workstream of its own. See the open questions in `IMPLEMENTATION_PLAN.md`.                                                                                                                                  |
+| **Page transitions in the App Router**                   | `AnimatePresence` exit animations are unreliable across route changes                               | Use the browser View Transitions API with graceful fallback. Test in Phase 2.                                                                                                                                            |
+| **New major versions** (Nest 12, Next 16, TS 6)          | Examples online may be outdated                                                                     | Generated from the official scaffolds; exact versions committed through the lockfile.                                                                                                                                    |
+
+## 8. Deployment
 
 - **Web:** Vercel project with root directory `apps/web`.
 - **API:** Container on an always-on Node host. Railway, Render, Fly.io and ECS Fargate all fit; to be chosen in Phase 7 (Dockerfile added then).

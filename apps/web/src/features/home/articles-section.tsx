@@ -2,6 +2,7 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { SectionHeading } from '@/components/catalog/section-heading';
 import { ArticleGrid } from '@/features/articles/components/article-grid';
+import { ArticlesUnavailable } from '@/features/articles/components/articles-unavailable';
 import { getFeaturedArticles, getLatestArticles } from '@/features/articles/queries';
 import { getCategory } from '@/features/catalog/categories';
 
@@ -17,29 +18,41 @@ const COMING_UP = [
 export async function ArticlesSection() {
   const [featured, latest] = await Promise.all([getFeaturedArticles(), getLatestArticles()]);
 
+  if (featured === null || latest === null) {
+    return (
+      <div className="border-y bg-card/50">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+          <ArticlesUnavailable />
+        </div>
+      </div>
+    );
+  }
+
   if (featured.length === 0 && latest.length === 0) return <NoArticlesYet />;
+
+  // An article shouldn't appear twice on one page.
+  const featuredIds = new Set(featured.map((article) => article.id));
+  const recent = latest.filter((article) => !featuredIds.has(article.id));
 
   return (
     <>
       {featured.length > 0 && (
-        <section
-          aria-labelledby="featured"
-          className="mx-auto w-full max-w-7xl border-t px-4 py-16 sm:px-6 sm:py-24"
-        >
-          <SectionHeading id="featured" eyebrow="Featured" title="Start with these." />
-          <div className="mt-10">
-            <ArticleGrid articles={featured} />
+        <section aria-labelledby="featured" className="border-t px-4 py-16 sm:px-6 sm:py-24">
+          <div className="mx-auto max-w-7xl">
+            <SectionHeading id="featured" eyebrow="Featured" title="Start with these." />
+            <div className="mt-10">
+              <ArticleGrid articles={featured} />
+            </div>
           </div>
         </section>
       )}
-      {latest.length > 0 && (
-        <section
-          aria-labelledby="latest"
-          className="mx-auto w-full max-w-7xl border-t px-4 py-16 sm:px-6 sm:py-24"
-        >
-          <SectionHeading id="latest" eyebrow="Latest" title="Recently published." />
-          <div className="mt-10">
-            <ArticleGrid articles={latest} />
+      {recent.length > 0 && (
+        <section aria-labelledby="latest" className="border-t px-4 py-16 sm:px-6 sm:py-24">
+          <div className="mx-auto max-w-7xl">
+            <SectionHeading id="latest" eyebrow="Latest" title="Recently published." />
+            <div className="mt-10">
+              <ArticleGrid articles={recent} />
+            </div>
           </div>
         </section>
       )}

@@ -14,6 +14,7 @@ const ARTICLE: ArticleSummary = {
   readingTimeMinutes: 12,
   difficulty: 'medium',
   publishedAt: '2026-03-01T00:00:00.000Z',
+  isFeatured: false,
 };
 
 describe('ArticleCard', () => {
