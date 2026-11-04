@@ -26,4 +26,31 @@ export interface ArticleSummary {
   readingTimeMinutes: number;
   difficulty: Difficulty | null;
   publishedAt: string;
+  isFeatured: boolean;
+}
+
+export interface ArticleAuthor {
+  displayName: string;
+  avatarUrl: string | null;
+}
+
+export interface TagSummary {
+  slug: string;
+  name: string;
+}
+
+export interface ArticleDetail extends ArticleSummary {
+  content: string;
+  tags: TagSummary[];
+  author: ArticleAuthor | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  updatedAt: string;
+}
+
+export interface CategorySummary {
+  slug: CategorySlug;
+  name: string;
+  description: string;
+  articleCount: number;
 }

@@ -35,6 +35,18 @@ npm run dev
 - API health: http://localhost:4000/api/v1/health
 - API docs: http://localhost:4000/api/docs
 
+For real data, start a local Supabase (needs Docker). It applies the migrations and development seed:
+
+```bash
+npm run db:start
+```
+
+```bash
+npm run db:reset
+```
+
+Then copy the URL and keys printed by `npx supabase status` into `apps/api/.env`, and regenerate types after schema changes with `npm run db:types`.
+
 The API runs without Supabase credentials in development; the health endpoint reports `not_configured`. In production it refuses to start without them.
 
 ## Commands

@@ -5,7 +5,10 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter.js';
 import { ResponseEnvelopeInterceptor } from './common/interceptors/response-envelope.interceptor.js';
 import { RequestContextMiddleware } from './common/middleware/request-context.middleware.js';
 import { validateEnv } from './config/env.js';
+import { ArticlesModule } from './modules/articles/articles.module.js';
+import { CategoriesModule } from './modules/categories/categories.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { TagsModule } from './modules/tags/tags.module.js';
 import { SupabaseModule } from './supabase/supabase.module.js';
 
 @Module({
@@ -13,6 +16,9 @@ import { SupabaseModule } from './supabase/supabase.module.js';
     ConfigModule.forRoot({ isGlobal: true, validate: validateEnv, cache: true }),
     SupabaseModule,
     HealthModule,
+    CategoriesModule,
+    TagsModule,
+    ArticlesModule,
   ],
   providers: [
     { provide: APP_FILTER, useClass: AllExceptionsFilter },

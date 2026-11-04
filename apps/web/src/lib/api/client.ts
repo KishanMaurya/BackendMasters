@@ -1,6 +1,8 @@
 import type { ApiFailure, ApiSuccess } from '@backendmasters/shared';
 import { env } from '@/lib/env';
 
+const REQUEST_TIMEOUT_MS = 5000;
+
 export class ApiError extends Error {
   constructor(
     readonly status: number,
@@ -16,6 +18,7 @@ export class ApiError extends Error {
 /** The single HTTP entry point to the BackendMasters API. Feature code calls this, never fetch(). */
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<ApiSuccess<T>> {
   const response = await fetch(`${env.API_URL}${path}`, {
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     ...init,
     headers: { Accept: 'application/json', ...init?.headers },
   });

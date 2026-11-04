@@ -107,19 +107,18 @@ export default async function LearnPage() {
         </ul>
       </section>
 
-      <section
-        aria-labelledby="all"
-        className="mx-auto w-full max-w-7xl border-t px-4 py-14 sm:px-6"
-      >
-        <SectionHeading id="all" eyebrow="All tracks" title="Or browse by subject." />
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {CATEGORIES.map((category) => (
-            <CategoryCard
-              key={category.slug}
-              category={category}
-              articleCount={counts[category.slug]}
-            />
-          ))}
+      <section aria-labelledby="all" className="border-t px-4 py-14 sm:px-6">
+        <div className="mx-auto max-w-7xl">
+          <SectionHeading id="all" eyebrow="All tracks" title="Or browse by subject." />
+          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {CATEGORIES.map((category) => (
+              <CategoryCard
+                key={category.slug}
+                category={category}
+                articleCount={counts[category.slug]}
+              />
+            ))}
+          </div>
         </div>
       </section>
     </>

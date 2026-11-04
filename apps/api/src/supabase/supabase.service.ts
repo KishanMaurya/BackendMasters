@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import type { DependencyStatus } from '@backendmasters/shared';
 import type { Env } from '../config/env.js';
+import type { Database } from './database.types.js';
 
 const HEALTH_TIMEOUT_MS = 2000;
 
@@ -15,8 +16,8 @@ export class SupabaseService {
   private readonly url?: string;
   private readonly publishableKey?: string;
   private readonly secretKey?: string;
-  private publicInstance?: SupabaseClient;
-  private adminInstance?: SupabaseClient;
+  private publicInstance?: SupabaseClient<Database>;
+  private adminInstance?: SupabaseClient<Database>;
 
   constructor(config: ConfigService<Env, true>) {
     this.url = config.get('SUPABASE_URL', { infer: true });
@@ -29,19 +30,19 @@ export class SupabaseService {
   }
 
   /** Anonymous access. RLS applies. For public reads. */
-  get publicClient(): SupabaseClient {
+  get publicClient(): SupabaseClient<Database> {
     this.publicInstance ??= this.build(this.publishableKey);
     return this.publicInstance;
   }
 
   /** Bypasses RLS. Only for narrow server jobs such as view counting and storage. */
-  get adminClient(): SupabaseClient {
+  get adminClient(): SupabaseClient<Database> {
     this.adminInstance ??= this.build(this.secretKey);
     return this.adminInstance;
   }
 
   /** Acts as the signed-in user. RLS applies. Created per request. For admin content writes. */
-  clientForUser(accessToken: string): SupabaseClient {
+  clientForUser(accessToken: string): SupabaseClient<Database> {
     return this.build(this.publishableKey, {
       global: { headers: { Authorization: `Bearer ${accessToken}` } },
     });
@@ -63,11 +64,11 @@ export class SupabaseService {
   private build(
     key: string | undefined,
     options: { global?: { headers: Record<string, string> } } = {},
-  ): SupabaseClient {
+  ): SupabaseClient<Database> {
     if (!this.url || !key) {
       throw new ServiceUnavailableException('Supabase is not configured');
     }
-    return createClient(this.url, key, {
+    return createClient<Database>(this.url, key, {
       ...options,
       auth: { persistSession: false, autoRefreshToken: false },
     });

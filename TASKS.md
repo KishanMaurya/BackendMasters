@@ -1,6 +1,6 @@
 # BackendMasters — Tasks
 
-Status: **Phases 1 and 2 complete. Phase 3 not started.** Check off items only once verified.
+Status: **Phases 1, 2 and 3 complete. Phase 4 not started.** Check off items only once verified.
 
 ## Phase 0 — Planning
 
@@ -42,15 +42,16 @@ Status: **Phases 1 and 2 complete. Phase 3 not started.** Check off items only o
 
 ## Phase 3 — Database and API
 
-- [ ] Migrations: `profiles`, `categories`, `articles`, `tags`, `article_tags`, `bookmarks`, `article_views`, `interview_questions`, `dsa_problems`
-- [ ] Indexes, unique slugs, timestamp triggers
-- [ ] Row Level Security policies and tests
-- [ ] Categories seed
-- [ ] NestJS modules: articles, categories, tags
-- [ ] Web API client and connected pages (replace the stubs in `features/articles/queries.ts`)
+- [x] Migrations: `profiles`, `categories`, `articles`, `tags`, `article_tags`, `bookmarks`, `article_views`, `interview_questions`, `dsa_problems`
+- [x] Indexes, unique slugs, timestamp triggers
+- [x] Row Level Security policies and tests
+- [x] Categories seed
+- [x] NestJS read APIs: articles, categories, tags (writes need auth, so they come in Phase 5)
+- [x] Web API client and connected pages
 
 ## Phase 4 — Articles
 
+- [ ] Create `/articles/[slug]`: article cards link there and 404 until it exists
 - [ ] Listing with pagination and filters
 - [ ] Detail page layout
 - [ ] Markdown rendering with sanitization
@@ -66,7 +67,9 @@ Status: **Phases 1 and 2 complete. Phase 3 not started.** Check off items only o
 - [ ] Article CRUD with Markdown editor and preview
 - [ ] Cover image upload
 - [ ] Category and tag management
-- [ ] Publish and unpublish, on-demand revalidation
+- [ ] Publish and unpublish, on-demand revalidation of the `content` cache tag
+- [ ] Decide on public sign-ups: turn them off in `supabase/config.toml` if only admins log in
+- [ ] Storage bucket for cover images, and its policies
 
 ## Phase 6 — Learning modules
 
