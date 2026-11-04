@@ -37,4 +37,4 @@ None of these block Phase 1 or 2.
 1. **Bookmarks:** the schema asks for `bookmarks`, but the only login specified is for admins. Do readers get accounts? The table gets created either way; the reader login UI wouldn't be built unless you want it.
 2. **Launch content:** your `interview-pdfs` books are tested Markdown and could seed DSA articles, but you sell those on Topmate. Would you publish some of it free, or should site content be separate?
 3. **API host:** needs a decision by Phase 7. Railway is the simplest choice; ECS would double as AWS content material.
-4. **Social links and contact address** for the footer in Phase 2.
+4. **Contact address:** the footer and `/about` link to your Instagram and YouTube, taken from your `interview-pdfs` brand files. Is there an email address to publish as well?

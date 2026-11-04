@@ -1,6 +1,7 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 @import 'shadcn/tailwind.css';
+@import '../styles/motion.css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -50,6 +51,7 @@
 }
 
 :root {
+  color-scheme: light;
   /* Light theme. Accent differs from dark: #54D045 on white is only 2.0:1. See docs/DESIGN_SYSTEM.md. */
   --background: #f6f7f9;
   --foreground: #10131c;
@@ -94,6 +96,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --background: #10131c;
   --foreground: #ffffff;
   --card: #1c2230;
@@ -145,11 +148,20 @@
   }
   html {
     @apply font-sans;
+    scroll-padding-top: 5.5rem;
+  }
+  a,
+  button {
+    -webkit-tap-highlight-color: transparent;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
   }
   h1,
   h2,
   h3,
   h4 {
     @apply font-heading;
+    text-wrap: balance;
   }
 }
