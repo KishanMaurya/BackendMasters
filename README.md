@@ -45,7 +45,9 @@ npm run db:start
 npm run db:reset
 ```
 
-Then copy the URL and keys printed by `npx supabase status` into `apps/api/.env`, and regenerate types after schema changes with `npm run db:types`.
+Then copy the URL and keys printed by `npx supabase status` into `apps/api/.env`, the URL and publishable key into `apps/web/.env.local`, and set the same `REVALIDATE_SECRET` in both. Regenerate types after schema changes with `npm run db:types`.
+
+The admin area is at `/admin`. Accounts and production setup are in [docs/ADMIN.md](docs/ADMIN.md).
 
 The API runs without Supabase credentials in development; the health endpoint reports `not_configured`. In production it refuses to start without them.
 

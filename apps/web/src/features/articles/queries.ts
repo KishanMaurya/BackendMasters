@@ -18,7 +18,7 @@ import { toSearchParams, type ArticleFilters } from './listing-params';
  */
 export type ArticleListResult = ArticleSummary[] | null;
 
-/** Revalidated on publish from Phase 5. Until then, content refreshes hourly. */
+/** The API asks for this to be revalidated when content changes. See app/api/revalidate. */
 export const CONTENT_CACHE_TAG = 'content';
 
 const HOME_PAGE_SIZE = 6;

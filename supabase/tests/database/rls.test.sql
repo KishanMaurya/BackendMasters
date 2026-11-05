@@ -1,7 +1,7 @@
 -- Proves the access rules from docs/ARCHITECTURE.md §4. Run with: npm run db:test
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(35);
+select plan(46);
 
 -- Fixtures, created as the privileged test role.
 insert into auth.users (id, email, raw_user_meta_data) values
@@ -173,6 +173,83 @@ select results_eq(
 );
 
 reset role;
+
+-- Phase 5: saving articles, the reserved slug, and image storage.
+reset role;
+select set_config('request.jwt.claims', '', true);
+
+select throws_ok(
+  $$ insert into public.articles (slug, title, category_id)
+     values ('slugs', 'Reserved', (select id from public.categories where slug = 'dsa')) $$,
+  '23514', null, 'the reserved slug is refused by the database'
+);
+
+select is(
+  (select public from storage.buckets where id = 'article-covers'), true,
+  'the image bucket is public to read'
+);
+select ok(
+  not (select allowed_mime_types @> array['image/svg+xml'] from storage.buckets where id = 'article-covers'),
+  'the image bucket refuses SVG'
+);
+
+insert into public.articles (id, slug, title, category_id) values
+  ('00000000-0000-0000-0000-00000000000f', 'test-stale', 'Stale',
+    (select id from public.categories where slug = 'dsa'));
+
+prepare save_as_caller(uuid, timestamptz, text) as
+  select public.save_article(
+    $1, $2, $3, 'Saved', '', '', null,
+    (select id from public.categories where slug = 'dsa'),
+    1, null, null, null, false,
+    array['00000000-0000-0000-0000-0000000000d1']::uuid[]
+  );
+
+-- Anonymous callers can't call it at all.
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select throws_ok(
+  $$ execute save_as_caller(null, null, 'anon-save') $$,
+  '42501', null, 'anonymous callers cannot save an article'
+);
+
+-- A signed-in reader can call it and is refused.
+set local role authenticated;
+select set_config('request.jwt.claims', '{"role":"authenticated","sub":"00000000-0000-0000-0000-00000000000b"}', true);
+select throws_ok(
+  $$ execute save_as_caller(null, null, 'reader-save') $$,
+  '42501', null, 'a reader cannot save an article'
+);
+select throws_ok(
+  $$ insert into storage.objects (bucket_id, name) values ('article-covers', 'reader.png') $$,
+  '42501', null, 'a reader cannot add an image'
+);
+
+-- An administrator can, with the author taken from their session and tags saved alongside.
+select set_config('request.jwt.claims', '{"role":"authenticated","sub":"00000000-0000-0000-0000-00000000000a"}', true);
+select lives_ok(
+  $$ execute save_as_caller(null, null, 'admin-save') $$,
+  'an administrator can save a new article'
+);
+select results_eq(
+  $$ select a.author_id::text, a.status::text, count(t.tag_id)::int
+     from public.articles a left join public.article_tags t on t.article_id = a.id
+     where a.slug = 'admin-save' group by a.id $$,
+  $$ values ('00000000-0000-0000-0000-00000000000a', 'draft', 1) $$,
+  'a saved article is a draft, by its author, with its tags'
+);
+select throws_ok(
+  $$ execute save_as_caller('00000000-0000-0000-0000-00000000000f', '2000-01-01T00:00:00Z', 'test-stale') $$,
+  'BM409', null, 'a stale save is refused'
+);
+select throws_ok(
+  $$ execute save_as_caller('00000000-0000-0000-0000-0000000000ff', now(), 'missing') $$,
+  'BM404', null, 'saving a missing article reports it'
+);
+select lives_ok(
+  $$ insert into storage.objects (bucket_id, name) values ('article-covers', 'admin.png') $$,
+  'an administrator can add an image'
+);
 
 select * from finish();
 rollback;

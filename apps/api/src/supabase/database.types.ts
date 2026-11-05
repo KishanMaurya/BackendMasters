@@ -461,6 +461,25 @@ export type Database = {
     };
     Functions: {
       is_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+      save_article: {
+        Args: {
+          p_category_id: string;
+          p_content: string;
+          p_cover_image_url: string;
+          p_description: string;
+          p_difficulty: Database['public']['Enums']['difficulty_level'];
+          p_expected_updated_at: string;
+          p_id: string;
+          p_is_featured: boolean;
+          p_reading_time_minutes: number;
+          p_seo_description: string;
+          p_seo_title: string;
+          p_slug: string;
+          p_tag_ids: string[];
+          p_title: string;
+        };
+        Returns: string;
+      };
     };
     Enums: {
       content_status: 'draft' | 'published';

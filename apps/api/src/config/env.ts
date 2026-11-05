@@ -14,6 +14,8 @@ const envSchema = z
     SUPABASE_URL: z.preprocess(blankToUndefined, z.url().optional()),
     SUPABASE_PUBLISHABLE_KEY: optionalString,
     SUPABASE_SECRET_KEY: optionalString,
+    WEB_REVALIDATE_URL: z.preprocess(blankToUndefined, z.url().optional()),
+    REVALIDATE_SECRET: z.preprocess(blankToUndefined, z.string().min(32).optional()),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== 'production') return;
@@ -21,6 +23,8 @@ const envSchema = z
       'SUPABASE_URL',
       'SUPABASE_PUBLISHABLE_KEY',
       'SUPABASE_SECRET_KEY',
+      'WEB_REVALIDATE_URL',
+      'REVALIDATE_SECRET',
     ] as const) {
       if (!env[key]) {
         ctx.addIssue({ code: 'custom', path: [key], message: 'Required in production' });

@@ -1,6 +1,6 @@
 # BackendMasters — Tasks
 
-Status: **Phases 1 to 4 complete. Phase 5 not started.** Check off items only once verified.
+Status: **Phases 1 to 5 complete. Phase 6 not started.** Check off items only once verified.
 
 ## Phase 0 — Planning
 
@@ -62,15 +62,15 @@ Status: **Phases 1 to 4 complete. Phase 5 not started.** Check off items only on
 
 ## Phase 5 — Admin
 
-- [ ] Reject the reserved article slug `slugs`, which `GET /articles/slugs` already uses
-- [ ] Admin login and `AdminGuard`
-- [ ] Dashboard statistics
-- [ ] Article CRUD with Markdown editor and preview
-- [ ] Cover image upload
-- [ ] Category and tag management
-- [ ] Publish and unpublish, on-demand revalidation of the `content` cache tag
-- [ ] Decide on public sign-ups: turn them off in `supabase/config.toml` if only admins log in
-- [ ] Storage bucket for cover images, and its policies
+- [x] Reject the reserved article slug `slugs`, in the API and the database
+- [x] Admin login and `AdminGuard`
+- [x] Dashboard statistics
+- [x] Article CRUD with Markdown editor and preview
+- [x] Cover and inline image upload
+- [x] Category editing and tag management (adding a category needs code, see `docs/ADMIN.md`)
+- [x] Publish, schedule and unpublish, on-demand revalidation of the `content` cache tag
+- [x] Public sign-ups off locally. Turn them off on the hosted project too (`docs/ADMIN.md`)
+- [x] Storage bucket for images, and its policies
 
 ## Phase 6 — Learning modules
 
@@ -92,3 +92,7 @@ Status: **Phases 1 to 4 complete. Phase 5 not started.** Check off items only on
 - [ ] Contact address on `/about` and in the footer, if you want one beyond social links
 - [ ] Core Web Vitals and bundle budget
 - [ ] Deploy web and API, configure backendmasters.in
+- [ ] Refresh the site when a scheduled article's date arrives
+- [ ] Redirects for changed article slugs
+- [ ] Remove unused images from storage
+- [ ] Multi-factor sign-in for administrators
