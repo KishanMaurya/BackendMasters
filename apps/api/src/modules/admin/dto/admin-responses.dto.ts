@@ -157,6 +157,12 @@ export class DashboardStatsDto implements DashboardStats {
   @ApiProperty()
   tags: number;
 
+  @ApiProperty()
+  dsaProblems: number;
+
+  @ApiProperty()
+  interviewQuestions: number;
+
   @ApiProperty({ type: [AdminArticleListItemDto] })
   recent: AdminArticleListItem[];
 }

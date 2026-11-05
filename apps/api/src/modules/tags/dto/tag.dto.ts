@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { TagSummary } from '@backendmasters/shared';
+import type { TagSummary, TagUsage } from '@backendmasters/shared';
 
 export class TagDto implements TagSummary {
   @ApiProperty({ example: 'caching' })
@@ -7,4 +7,12 @@ export class TagDto implements TagSummary {
 
   @ApiProperty({ example: 'Caching' })
   name: string;
+}
+
+export class TagUsageDto implements TagUsage {
+  @ApiProperty({ example: 'caching' })
+  slug: string;
+
+  @ApiProperty({ example: 3 })
+  articleCount: number;
 }

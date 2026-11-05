@@ -79,7 +79,7 @@ A single soft green accent glow is allowed behind the hero. That's the whole gra
 2. **Animate only `transform` and `opacity`.** SVG line motion may use `stroke-dashoffset`.
 3. **Reading is sacred.** Nothing moves beside article body text except the progress bar.
 4. **Offscreen animation pauses**, using IntersectionObserver.
-5. **Reduced motion is a designed state, not an afterthought.** With `prefers-reduced-motion`, ambient loops stop, entrances become instant, and explainers show their final frame plus step controls.
+5. **Reduced motion is a designed state, not an afterthought.** With `prefers-reduced-motion`, ambient loops stop, entrances become instant, and explainer steps change without animation. Explainers never start by themselves, whatever the setting.
 6. **No content depends on animation.** Every animated illustration has a static SVG state and a text alternative.
 7. **LCP is text.** The hero heading paints immediately; the background joins afterwards.
 
@@ -93,7 +93,7 @@ The brief lists seven tools and also says to choose the lightest fit. This is ho
 | **Motion** (`motion/react`)  | Not installed yet          | Everything in Phase 2 was achievable without it. Add it in Phase 6 if an explainer needs gesture or layout animation |
 | **React `<ViewTransition>`** | Live                       | Page crossfades, with no extra library. Browsers without support swap instantly                                      |
 | **Mermaid**                  | Phase 4, dynamic import    | Only loaded on articles containing a diagram                                                                         |
-| **React Flow**               | Phase 6, dynamic import    | Only on interactive architecture explorers                                                                           |
+| **React Flow**               | Live, dynamic import       | Only on `/system-design`, about 60 KB, loaded when the explorer nears the screen                                     |
 | **GSAP**                     | Not installed until needed | Added only if a scroll-story explainer can't be done with Motion                                                     |
 | **Lottie**                   | Not planned                | Would need external After Effects assets; SVG/CSS covers small loaders at lower weight                               |
 
@@ -102,6 +102,8 @@ The brief lists seven tools and also says to choose the lightest fit. This is ho
 **Measured at the end of Phase 2** (production build, 375px, 4x CPU throttle, slow 4G, empty cache): LCP 0.7 to 1.2s, CLS 0, under 5ms of blocking time.
 
 **Articles at the end of Phase 4** (same conditions): LCP 0.7s, CLS 0, 169 KB of JS. An article with a diagram also loads Mermaid (about 650 KB) after the page goes idle, with about 220ms of blocking time. It never affects articles without diagrams.
+
+**Learning modules at the end of Phase 6** (same conditions): LCP 0.7 to 1.4s, CLS 0.011 or less, under 25ms of blocking time. First-load JS is 170 to 190 KB, a little over budget, and `/system-design` adds about 60 KB for React Flow once scrolled to.
 
 **Code colours:** `github-dark-default` and `github-light-default`. The plain `github-dark` and `github-light` themes fail AA on our card colours (3.3:1 and 3.49:1). Ligatures are off in code, so readers see the characters they would type.
 
@@ -138,9 +140,18 @@ The brief's particles and floating symbols are treated as optional. They're adde
 | Backend Engineering | Request pipeline through middleware layers                 |
 | Interview Prep      | Question card that flips into a code snippet               |
 
-### Interactive explainers (Phase 6)
+### Interactive explainers
 
-Load balancer, Kafka, sharding, distributed tracing and caching. All built on one `<Explainer>` primitive with play, pause and step controls and a caption describing the current step, so they're keyboard-usable and meaningful with motion off.
+Load balancer, Kafka, sharding, distributed tracing, caching and sliding window, in `features/explainers/`.
+
+- **One frame for all of them.** `<Explainer>` provides play, pause, step and restart controls, a caption, and every step as text under "Read all steps". An explainer only supplies its captions and how to draw a step.
+- **Real logic.** `scenes.ts` holds the simulations, separate from drawing and covered by tests. The sliding window runs the same algorithm as the published problem.
+- **Nothing starts by itself.** Playback stops when the explainer leaves the screen. Each explainer is its own chunk, so a page only loads the ones it shows.
+- **Usable in articles.** A fenced code block with the language `explainer` and a name inserts one. An unknown name renders nothing.
+
+### Architecture explorer
+
+`features/architecture/` on `/system-design`. Components can be selected and dragged, and selecting one explains what it does and what happens when it fails. The page keeps scrolling over the canvas on touch screens, so panning is off and zoom uses the on-screen controls. The same content is always available as text beneath it.
 
 ## 7. Testing animation
 

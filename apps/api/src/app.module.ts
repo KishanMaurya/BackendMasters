@@ -8,7 +8,9 @@ import { validateEnv } from './config/env.js';
 import { AdminModule } from './modules/admin/admin.module.js';
 import { ArticlesModule } from './modules/articles/articles.module.js';
 import { CategoriesModule } from './modules/categories/categories.module.js';
+import { DsaModule } from './modules/dsa/dsa.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { InterviewModule } from './modules/interview/interview.module.js';
 import { TagsModule } from './modules/tags/tags.module.js';
 import { SupabaseModule } from './supabase/supabase.module.js';
 
@@ -20,6 +22,8 @@ import { SupabaseModule } from './supabase/supabase.module.js';
     CategoriesModule,
     TagsModule,
     ArticlesModule,
+    DsaModule,
+    InterviewModule,
     AdminModule,
   ],
   providers: [

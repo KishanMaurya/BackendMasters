@@ -1,9 +1,21 @@
-import { Controller, Get } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import type { TagSummary } from '@backendmasters/shared';
+import { Controller, Get, Query } from '@nestjs/common';
+import { ApiOperation, ApiProperty, ApiTags } from '@nestjs/swagger';
+import { IsIn } from 'class-validator';
+import {
+  CATEGORY_SLUGS,
+  type CategorySlug,
+  type TagSummary,
+  type TagUsage,
+} from '@backendmasters/shared';
 import { ApiOkEnvelope } from '../../common/http/api-envelope.decorator.js';
-import { TagDto } from './dto/tag.dto.js';
+import { TagDto, TagUsageDto } from './dto/tag.dto.js';
 import { TagsRepository } from './tags.repository.js';
+
+class TagUsageQuery {
+  @ApiProperty({ enum: CATEGORY_SLUGS })
+  @IsIn(CATEGORY_SLUGS)
+  category: CategorySlug;
+}
 
 @ApiTags('tags')
 @Controller('tags')
@@ -15,5 +27,12 @@ export class TagsController {
   @ApiOkEnvelope(TagDto, { isArray: true })
   list(): Promise<TagSummary[]> {
     return this.tags.findAll();
+  }
+
+  @Get('usage')
+  @ApiOperation({ summary: 'Published articles per tag within a category' })
+  @ApiOkEnvelope(TagUsageDto, { isArray: true })
+  usage(@Query() { category }: TagUsageQuery): Promise<TagUsage[]> {
+    return this.tags.findUsage(category);
   }
 }

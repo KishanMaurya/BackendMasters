@@ -93,7 +93,9 @@ export default async function ArticlePage({ params }: PageProps<'/articles/[slug
           </div>
           <dl className="flex flex-wrap gap-x-5 gap-y-1 font-mono text-xs text-muted-foreground">
             {article.author && (
-              <div className="flex gap-1.5">
+              // Its own line on phones. Otherwise this row can wrap differently once the web font
+              // loads, moving everything below it.
+              <div className="flex basis-full gap-1.5 sm:basis-auto">
                 <dt className="sr-only">Author</dt>
                 <dd>{article.author.displayName}</dd>
               </div>

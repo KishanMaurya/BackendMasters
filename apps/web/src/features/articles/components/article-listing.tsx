@@ -1,8 +1,8 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import Link from 'next/link';
+import { FilterChip } from '@/components/catalog/filter-chip';
 import { getArticlePage } from '@/features/articles/queries';
 import { CATEGORIES } from '@/features/catalog/categories';
-import { cn } from '@/lib/utils';
 import {
   ARTICLES_PER_PAGE,
   DIFFICULTIES,
@@ -13,61 +13,36 @@ import {
 import { ArticleGrid } from './article-grid';
 import { ArticlesUnavailable } from './articles-unavailable';
 
-function Chip({
-  href,
-  active,
-  children,
-}: {
-  href: string;
-  active: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? 'true' : undefined}
-      className={cn(
-        'rounded-full border px-3 py-1.5 text-sm whitespace-nowrap transition-colors duration-(--motion-fast)',
-        active
-          ? 'border-primary bg-accent text-accent-foreground'
-          : 'text-muted-foreground hover:border-foreground/30 hover:text-foreground',
-      )}
-    >
-      {children}
-    </Link>
-  );
-}
-
 function Filters({ filters }: { filters: ArticleFilters }) {
   const { category, difficulty, tag } = filters;
   return (
     <div className="space-y-3">
       <nav aria-label="Filter by track" className="flex flex-wrap gap-2">
-        <Chip href={listingHref({ difficulty, tag })} active={!category}>
+        <FilterChip href={listingHref({ difficulty, tag })} active={!category}>
           All tracks
-        </Chip>
+        </FilterChip>
         {CATEGORIES.map((item) => (
-          <Chip
+          <FilterChip
             key={item.slug}
             href={listingHref({ category: item.slug, difficulty, tag })}
             active={category === item.slug}
           >
             {item.name}
-          </Chip>
+          </FilterChip>
         ))}
       </nav>
       <nav aria-label="Filter by difficulty" className="flex flex-wrap items-center gap-2">
-        <Chip href={listingHref({ category, tag })} active={!difficulty}>
+        <FilterChip href={listingHref({ category, tag })} active={!difficulty}>
           Any level
-        </Chip>
+        </FilterChip>
         {DIFFICULTIES.map((level) => (
-          <Chip
+          <FilterChip
             key={level}
             href={listingHref({ category, tag, difficulty: level })}
             active={difficulty === level}
           >
             <span className="capitalize">{level}</span>
-          </Chip>
+          </FilterChip>
         ))}
         {tag && (
           <Link

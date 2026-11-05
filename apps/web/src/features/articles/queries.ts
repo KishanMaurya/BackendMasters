@@ -5,6 +5,7 @@ import type {
   CategorySlug,
   CategorySummary,
   PaginationMeta,
+  TagUsage,
 } from '@backendmasters/shared';
 import { ApiError, apiFetch } from '@/lib/api/client';
 import { toSearchParams, type ArticleFilters } from './listing-params';
@@ -68,6 +69,20 @@ export async function getArticleCounts(): Promise<Partial<Record<CategorySlug, n
   cacheTag(CONTENT_CACHE_TAG);
   try {
     const { data } = await apiFetch<CategorySummary[]>('/categories');
+    return Object.fromEntries(data.map(({ slug, articleCount }) => [slug, articleCount]));
+  } catch {
+    retrySoon();
+    return {};
+  }
+}
+
+/** Published articles per topic tag. Topics are still listed if this fails. */
+export async function getTagUsage(category: CategorySlug): Promise<Record<string, number>> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(CONTENT_CACHE_TAG);
+  try {
+    const { data } = await apiFetch<TagUsage[]>(`/tags/usage?category=${category}`);
     return Object.fromEntries(data.map(({ slug, articleCount }) => [slug, articleCount]));
   } catch {
     retrySoon();

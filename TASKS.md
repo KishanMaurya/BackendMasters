@@ -1,6 +1,6 @@
 # BackendMasters — Tasks
 
-Status: **Phases 1 to 5 complete. Phase 6 not started.** Check off items only once verified.
+Status: **Phases 1 to 6 complete. Phase 7 not started.** Check off items only once verified.
 
 ## Phase 0 — Planning
 
@@ -74,14 +74,16 @@ Status: **Phases 1 to 5 complete. Phase 6 not started.** Check off items only on
 
 ## Phase 6 — Learning modules
 
-- [ ] DSA module, topics and difficulty filters, multi-language solutions
-- [ ] LLD module
-- [ ] HLD and system design template (10 required sections)
-- [ ] AWS module
-- [ ] Observability module
-- [ ] Interview question bank and filters
-- [ ] Interactive explainers: load balancer, Kafka, sharding, tracing, caching
-- [ ] React Flow architecture explorer
+- [x] DSA module, topics and difficulty filters, multi-language solutions
+- [x] LLD module (topics link to articles by tag)
+- [x] HLD and system design template (10 required sections, as an outline and checklist in the editor)
+- [x] AWS module
+- [x] Observability module
+- [x] Interview question bank, search and filters
+- [x] Admin screens for DSA problems and interview questions
+- [x] Interactive explainers: load balancer, Kafka, sharding, tracing, caching, sliding window
+- [x] React Flow architecture explorer
+- [x] Sample content for local development, with every DSA solution run in all four languages
 
 ## Phase 7 — Launch
 
@@ -90,7 +92,9 @@ Status: **Phases 1 to 5 complete. Phase 6 not started.** Check off items only on
 - [ ] Sitemap, robots.txt, Article and Breadcrumb structured data
 - [ ] Full test pass
 - [ ] Contact address on `/about` and in the footer, if you want one beyond social links
-- [ ] Core Web Vitals and bundle budget
+- [ ] Core Web Vitals and bundle budget (first-load JS is 170 to 190 KB against a 170 KB budget)
+- [ ] Published launch content: articles, problems and questions on the hosted project
+- [ ] Keep the language choice across DSA problems
 - [ ] Deploy web and API, configure backendmasters.in
 - [ ] Refresh the site when a scheduled article's date arrives
 - [ ] Redirects for changed article slugs

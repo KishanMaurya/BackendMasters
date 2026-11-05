@@ -1,7 +1,7 @@
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Eyebrow } from '@/components/catalog/section-heading';
-import { getCategory, topicAnchor } from '@/features/catalog/categories';
+import { getCategory } from '@/features/catalog/categories';
 
 export function InterviewSection() {
   const { topics, href } = getCategory('interview-questions');
@@ -38,7 +38,7 @@ export function InterviewSection() {
         {topics.map((topic) => (
           <li key={topic}>
             <Link
-              href={`${href}#${topicAnchor(topic)}`}
+              href={`${href}?technology=${encodeURIComponent(topic)}`}
               className="group/q flex items-center justify-between gap-3 rounded-xl border bg-card p-4 transition-colors duration-(--motion-fast) hover:border-primary/60"
             >
               <span className="text-sm font-medium">

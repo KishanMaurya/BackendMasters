@@ -1,12 +1,14 @@
 'use client';
 
-import { FileText, LayoutDashboard, Tags } from 'lucide-react';
+import { Binary, ClipboardCheck, FileText, LayoutDashboard, Tags } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const LINKS = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/admin/articles', label: 'Articles', icon: FileText, exact: false },
+  { href: '/admin/dsa', label: 'DSA problems', icon: Binary, exact: false },
+  { href: '/admin/interview', label: 'Interview questions', icon: ClipboardCheck, exact: false },
   { href: '/admin/taxonomy', label: 'Categories & tags', icon: Tags, exact: false },
 ];
 

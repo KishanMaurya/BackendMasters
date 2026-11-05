@@ -1,11 +1,14 @@
 import { CircleAlert, Info, Lightbulb, OctagonAlert, TriangleAlert } from 'lucide-react';
 import type { ComponentProps, ReactNode } from 'react';
 import type { Components } from 'react-markdown';
+import { LazyExplainer } from '@/features/explainers/lazy-explainer';
+import { isExplainerName } from '@/features/explainers/names';
 import { CodeFrame } from './code-frame';
 import { MermaidDiagram } from './mermaid-diagram';
 
 type DataProps = {
   'data-code'?: string;
+  'data-explainer'?: string;
   'data-language'?: string;
   'data-mermaid'?: string;
   'data-note'?: string;
@@ -25,11 +28,16 @@ function Pre(props: ComponentProps<'pre'> & DataProps) {
     'data-code': code = '',
     'data-language': language = 'Text',
     'data-mermaid': mermaid,
+    'data-explainer': explainer,
     node: _node,
     ...rest
   } = props;
 
   if (mermaid) return <MermaidDiagram code={code} />;
+  // An unknown name, such as a typo, shows nothing to readers rather than a broken block.
+  if (explainer !== undefined) {
+    return isExplainerName(explainer) ? <LazyExplainer name={explainer} /> : null;
+  }
 
   return (
     <CodeFrame code={code} language={language}>
