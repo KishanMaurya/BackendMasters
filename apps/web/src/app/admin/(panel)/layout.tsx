@@ -10,7 +10,10 @@ import { AdminNav } from '@/features/admin/components/admin-nav';
 export default function AdminPanelLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[15rem_minmax(0,1fr)]">
-      <aside className="flex flex-col gap-4 border-b p-4 lg:sticky lg:top-0 lg:h-dvh lg:border-r lg:border-b-0">
+      <aside
+        aria-label="Admin menu"
+        className="flex flex-col gap-4 border-b p-4 lg:sticky lg:top-0 lg:h-dvh lg:border-r lg:border-b-0"
+      >
         <div className="flex items-center justify-between gap-2">
           <Logo />
           <ThemeToggle />

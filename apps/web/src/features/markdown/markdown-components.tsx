@@ -86,7 +86,8 @@ export const markdownComponents: Components = {
   h3: headingWithAnchor('h3'),
   table({ node: _node, ...props }) {
     return (
-      <div className="bm-table" tabIndex={0} role="region" aria-label="Table">
+      // A group, not a region: an article can have many tables, and landmarks must be unique.
+      <div className="bm-table" tabIndex={0} role="group" aria-label="Table, scrollable">
         <table {...props} />
       </div>
     );

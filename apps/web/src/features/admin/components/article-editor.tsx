@@ -401,7 +401,7 @@ export function ArticleEditor({
               value={input.title}
               onChange={(event) => updateTitle(event.target.value)}
               aria-invalid={Boolean(errors.title)}
-              className={cn(INPUT_CLASS, 'font-heading text-lg')}
+              className={cn(INPUT_CLASS, 'font-heading !text-lg')}
             />
           </Field>
           <Field
@@ -516,7 +516,7 @@ export function ArticleEditor({
           {errors.content && <p className="text-xs text-destructive">{errors.content}</p>}
         </div>
 
-        <aside className="space-y-5">
+        <aside aria-label="Article settings" className="space-y-5">
           <Panel title="Publishing">
             {state === 'published' && article?.publishedAt && (
               <p className="text-sm text-muted-foreground">
@@ -525,8 +525,8 @@ export function ArticleEditor({
             )}
             {state === 'scheduled' && article?.publishedAt && (
               <p className="text-sm text-muted-foreground">
-                Goes live <LocalTime iso={article.publishedAt} />. The site can take up to an hour
-                to show it.
+                Goes live <LocalTime iso={article.publishedAt} />, within about a minute of that
+                time.
               </p>
             )}
             {state !== 'published' && (

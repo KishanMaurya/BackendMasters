@@ -27,15 +27,19 @@ export function estimateReadingTime(markdown: string): number {
   return Math.max(1, Math.ceil(words / WORDS_PER_MINUTE));
 }
 
-/** An unchanged earlier date is kept, so republishing doesn't make an old article look new. */
+/**
+ * An unchanged earlier date is kept, so republishing doesn't make an old article look new.
+ * Null means "now", which the database fills in. RLS compares against the database's clock, so
+ * a date from this server's clock could leave an article hidden for as long as the two differ.
+ */
 export function resolvePublishDate(
   requested: string | undefined,
   existing: string | null,
   now = new Date(),
-): string {
+): string | null {
   if (requested) return new Date(requested).toISOString();
   if (existing && new Date(existing) <= now) return existing;
-  return now.toISOString();
+  return null;
 }
 
 @Injectable()

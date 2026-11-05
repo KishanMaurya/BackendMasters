@@ -1,26 +1,28 @@
-import type { Metadata } from 'next';
-import { CategoryCard } from '@/components/catalog/category-card';
+import { Suspense } from 'react';
 import { PageHeader } from '@/components/catalog/page-header';
-import { CATEGORIES } from '@/features/catalog/categories';
+import { SearchResults, SearchResultsSkeleton } from '@/features/search/components/search-results';
+import { pageMetadata } from '@/features/seo/metadata';
 
-export const metadata: Metadata = {
+// Result pages are thin and endless, so they stay out of search engines.
+export const metadata = pageMetadata({
   title: 'Search',
   description: 'Search BackendMasters articles, interview questions and DSA problems.',
-  robots: { index: false },
-};
+  path: '/search',
+  noindex: true,
+});
 
-export default function SearchPage() {
+export default function SearchPage({ searchParams }: PageProps<'/search'>) {
   return (
     <>
       <PageHeader
         crumbs={[{ label: 'Search' }]}
         title="Search"
-        lede="Search will open once articles are published. For now, browse what's planned in each track."
+        lede="Find articles, DSA problems and interview questions across every track."
       />
-      <div className="mx-auto grid w-full max-w-7xl gap-4 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4">
-        {CATEGORIES.map((category) => (
-          <CategoryCard key={category.slug} category={category} />
-        ))}
+      <div className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6">
+        <Suspense fallback={<SearchResultsSkeleton />}>
+          <SearchResults searchParams={searchParams} />
+        </Suspense>
       </div>
     </>
   );

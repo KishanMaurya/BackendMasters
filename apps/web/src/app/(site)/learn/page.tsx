@@ -1,4 +1,3 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CategoryCard } from '@/components/catalog/category-card';
 import { PageHeader } from '@/components/catalog/page-header';
@@ -12,12 +11,14 @@ import {
 import { getArticleCounts } from '@/features/articles/queries';
 import { CATEGORIES, getCategory } from '@/features/catalog/categories';
 import { LEARNING_PATHS, type LearningPath } from '@/features/catalog/paths';
+import { pageMetadata } from '@/features/seo/metadata';
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: 'Learning Paths',
   description:
     'Structured routes through DSA, design, cloud and observability, for interviews, production ownership and infrastructure.',
-};
+  path: '/learn',
+});
 
 const PATH_ILLUSTRATIONS = {
   interview: InterviewIllustration,

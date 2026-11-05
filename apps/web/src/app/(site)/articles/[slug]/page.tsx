@@ -11,6 +11,10 @@ import { listingHref } from '@/features/articles/listing-params';
 import { getArticle, getArticleSlugs, getRelatedArticles } from '@/features/articles/queries';
 import { renderArticle } from '@/features/articles/rendered-article';
 import { getCategory } from '@/features/catalog/categories';
+import { JsonLd } from '@/features/seo/json-ld';
+import { pageMetadata } from '@/features/seo/metadata';
+import { articleData, breadcrumbData } from '@/features/seo/structured-data';
+import { env } from '@/lib/env';
 
 /**
  * Blocking, not streamed: the first request for an article published after the build waits for
@@ -35,20 +39,13 @@ export async function generateMetadata({
   const article = await getArticle((await params).slug);
   if (!article) return {};
 
-  const title = article.seoTitle ?? article.title;
-  const description = article.seoDescription ?? article.description;
-  return {
-    title,
-    description,
-    openGraph: {
-      type: 'article',
-      title,
-      description,
-      publishedTime: article.publishedAt,
-      modifiedTime: article.updatedAt,
-      ...(article.coverImageUrl ? { images: [article.coverImageUrl] } : {}),
-    },
-  };
+  return pageMetadata({
+    title: article.seoTitle ?? article.title,
+    description: article.seoDescription ?? article.description,
+    path: `/articles/${article.slug}`,
+    article: { publishedTime: article.publishedAt, modifiedTime: article.updatedAt },
+    image: article.coverImageUrl,
+  });
 }
 
 export default async function ArticlePage({ params }: PageProps<'/articles/[slug]'>) {
@@ -65,6 +62,24 @@ export default async function ArticlePage({ params }: PageProps<'/articles/[slug
 
   return (
     <>
+      <JsonLd
+        data={articleData(env.NEXT_PUBLIC_SITE_URL, {
+          title: article.title,
+          description: article.seoDescription ?? article.description,
+          path: `/articles/${article.slug}`,
+          publishedAt: article.publishedAt,
+          updatedAt: article.updatedAt,
+          authorName: article.author?.displayName,
+          imageUrl: article.coverImageUrl,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbData(env.NEXT_PUBLIC_SITE_URL, [
+          { name: 'Home', path: '/' },
+          { name: category.name, path: category.href },
+          { name: article.title, path: `/articles/${article.slug}` },
+        ])}
+      />
       <ReadingProgress targetId={ARTICLE_BODY_ID} />
 
       <header className="border-b">

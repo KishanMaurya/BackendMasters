@@ -157,3 +157,40 @@ export interface TagUsage {
   slug: string;
   articleCount: number;
 }
+
+export type ContentKind = 'article' | 'problem' | 'question';
+
+/** The public address of any piece of content. */
+export function contentPath(kind: ContentKind, slug: string): string {
+  switch (kind) {
+    case 'article':
+      return `/articles/${slug}`;
+    case 'problem':
+      return `/dsa/${slug}`;
+    case 'question':
+      return `/interview-questions/${slug}`;
+  }
+}
+
+export interface SearchResult {
+  kind: ContentKind;
+  slug: string;
+  title: string;
+  /** Plain text. Markdown markers are removed by the API. */
+  description: string;
+  categorySlug: CategorySlug;
+  categoryName: string;
+  difficulty: Difficulty | null;
+}
+
+export interface SearchSuggestion {
+  kind: ContentKind;
+  slug: string;
+  title: string;
+}
+
+export interface SitemapEntry {
+  kind: ContentKind;
+  slug: string;
+  updatedAt: string;
+}

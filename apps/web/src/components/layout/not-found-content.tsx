@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 export function NotFoundContent() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col justify-center gap-6 px-4 py-24 sm:px-6">
-      <Frame viewBox="0 0 320 60" className="max-w-xs">
+      <Frame viewBox="0 0 320 60" className="h-auto w-full max-w-xs">
         <Wire d="M8 30H200" />
         <Wire dashed d="M200 30H300" />
         <circle cx={8} cy={30} r={5} className="fill-primary" />

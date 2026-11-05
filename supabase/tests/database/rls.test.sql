@@ -1,7 +1,7 @@
 -- Proves the access rules from docs/ARCHITECTURE.md §4. Run with: npm run db:test
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(50);
+select plan(53);
 
 -- Fixtures, created as the privileged test role.
 insert into auth.users (id, email, raw_user_meta_data) values
@@ -276,6 +276,20 @@ select set_config('request.jwt.claims', '{"role":"anon"}', true);
 select is_empty(
   $$ select 1 from public.dsa_problems where status = 'draft' $$,
   'anonymous callers cannot see draft problems'
+);
+
+-- Phase 7: search runs as the caller, so drafts stay hidden. Still anonymous here.
+select is_empty(
+  $$ select 1 from public.search_content('Draft') where kind = 'article' and slug = 'test-draft' $$,
+  'search does not return draft articles to anonymous callers'
+);
+select is_empty(
+  $$ select 1 from public.search_content('Scheduled') where slug = 'test-scheduled' $$,
+  'search does not return scheduled articles before their date'
+);
+select is_empty(
+  $$ select 1 from public.search_suggestions('Draft') where slug = 'test-draft' $$,
+  'suggestions do not return draft articles to anonymous callers'
 );
 
 select * from finish();

@@ -480,6 +480,34 @@ export type Database = {
         };
         Returns: string;
       };
+      search_content: {
+        Args: {
+          p_category?: string;
+          p_limit?: number;
+          p_offset?: number;
+          p_query: string;
+          p_tag?: string;
+        };
+        Returns: {
+          category_name: string;
+          category_slug: string;
+          description: string;
+          difficulty: Database['public']['Enums']['difficulty_level'];
+          kind: string;
+          rank: number;
+          slug: string;
+          title: string;
+          total: number;
+        }[];
+      };
+      search_suggestions: {
+        Args: { p_limit?: number; p_query: string };
+        Returns: {
+          kind: string;
+          slug: string;
+          title: string;
+        }[];
+      };
     };
     Enums: {
       content_status: 'draft' | 'published';

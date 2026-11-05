@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: Lint, types, tests and build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx prettier --check .
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run test:e2e
+      - run: npm run build
+
+  database:
+    name: Access rules and real database
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build --workspace @backendmasters/shared
+      - run: npx supabase start --exclude studio,imgproxy,mailpit,edge-runtime,logflare,vector
+      - run: npm run db:test
+      - name: Write the API's local settings
+        run: |
+          npx supabase status -o env > status.env
+          {
+            echo "SUPABASE_URL=$(grep '^API_URL=' status.env | cut -d= -f2- | tr -d '"')"
+            echo "SUPABASE_PUBLISHABLE_KEY=$(grep '^PUBLISHABLE_KEY=' status.env | cut -d= -f2- | tr -d '"')"
+            echo "SUPABASE_SECRET_KEY=$(grep '^SECRET_KEY=' status.env | cut -d= -f2- | tr -d '"')"
+          } > apps/api/.env
+          rm status.env
+      - run: npm run test:db

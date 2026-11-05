@@ -9,6 +9,10 @@ import { SolutionTabs } from '@/features/dsa/components/solution-tabs';
 import { getDsaProblem, getDsaSlugs } from '@/features/dsa/queries';
 import { renderArticle } from '@/features/articles/rendered-article';
 import { codeFence } from '@/features/markdown/code-fence';
+import { JsonLd } from '@/features/seo/json-ld';
+import { pageMetadata } from '@/features/seo/metadata';
+import { articleData, breadcrumbData } from '@/features/seo/structured-data';
+import { env } from '@/lib/env';
 
 /** Blocking, for the same reason as article pages. See docs/ARCHITECTURE.md §6. */
 export const instant = false;
@@ -21,13 +25,18 @@ export async function generateStaticParams() {
   return slugs.length > 0 ? slugs.map((slug) => ({ slug })) : [{ slug: BUILD_PLACEHOLDER }];
 }
 
+const describe = (title: string) =>
+  `${title}: brute force to optimal, with a dry run and solutions in JavaScript, TypeScript, Java and Go.`;
+
 export async function generateMetadata({ params }: PageProps<'/dsa/[slug]'>): Promise<Metadata> {
   const problem = await getDsaProblem((await params).slug);
   if (!problem) return {};
-  return {
+  return pageMetadata({
     title: problem.title,
-    description: `${problem.title}: brute force to optimal, with a dry run and solutions in JavaScript, TypeScript, Java and Go.`,
-  };
+    description: describe(problem.title),
+    path: `/dsa/${problem.slug}`,
+    article: { publishedTime: problem.publishedAt, modifiedTime: problem.updatedAt },
+  });
 }
 
 async function Markdown({ source }: { source: string }) {
@@ -61,6 +70,22 @@ export default async function DsaProblemPage({ params }: PageProps<'/dsa/[slug]'
 
   return (
     <>
+      <JsonLd
+        data={articleData(env.NEXT_PUBLIC_SITE_URL, {
+          title: problem.title,
+          description: describe(problem.title),
+          path: `/dsa/${problem.slug}`,
+          publishedAt: problem.publishedAt,
+          updatedAt: problem.updatedAt,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbData(env.NEXT_PUBLIC_SITE_URL, [
+          { name: 'Home', path: '/' },
+          { name: 'DSA', path: '/dsa' },
+          { name: problem.title, path: `/dsa/${problem.slug}` },
+        ])}
+      />
       <header className="border-b">
         <div className="mx-auto max-w-4xl space-y-4 px-4 py-10 sm:px-6 sm:py-14">
           <nav aria-label="Breadcrumb">

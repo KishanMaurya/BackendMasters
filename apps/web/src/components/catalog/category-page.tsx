@@ -10,12 +10,20 @@ import { ArticlesUnavailable } from '@/features/articles/components/articles-una
 import { listingHref } from '@/features/articles/listing-params';
 import { getArticlesByCategory, getTagUsage } from '@/features/articles/queries';
 import { getCategory, topicAnchor } from '@/features/catalog/categories';
+import { JsonLd } from '@/features/seo/json-ld';
+import { pageMetadata } from '@/features/seo/metadata';
+import { breadcrumbData } from '@/features/seo/structured-data';
+import { env } from '@/lib/env';
 import { PageHeader } from './page-header';
 import { Eyebrow } from './section-heading';
 
 export function categoryMetadata(slug: CategorySlug): Metadata {
   const category = getCategory(slug);
-  return { title: category.title, description: category.lede };
+  return pageMetadata({
+    title: category.title,
+    description: category.lede,
+    path: category.href,
+  });
 }
 
 /**
@@ -36,6 +44,13 @@ export function CategoryPage({
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbData(env.NEXT_PUBLIC_SITE_URL, [
+          { name: 'Home', path: '/' },
+          { name: 'Learn', path: '/learn' },
+          { name: category.name, path: category.href },
+        ])}
+      />
       <PageHeader
         crumbs={[{ label: 'Learn', href: '/learn' }, { label: category.name }]}
         title={category.title}

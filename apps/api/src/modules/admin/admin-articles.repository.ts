@@ -105,7 +105,7 @@ export class AdminArticlesRepository {
   async setStatus(
     admin: AdminContext,
     id: string,
-    change: { status: 'draft' } | { status: 'published'; publishedAt: string },
+    change: { status: 'draft' } | { status: 'published'; publishedAt: string | null },
   ): Promise<boolean> {
     const values =
       change.status === 'published'

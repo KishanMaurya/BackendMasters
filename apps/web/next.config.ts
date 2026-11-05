@@ -19,6 +19,29 @@ const nextConfig: NextConfig = {
     remotePatterns: supabaseUrl ? [new URL(`${supabaseUrl}/storage/v1/object/public/**`)] : [],
     dangerouslyAllowLocalIP: isLocalSupabase,
   },
+  poweredByHeader: false,
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000' },
+        ],
+      },
+    ];
+  },
+  async redirects() {
+    // The admin addresses named in the original brief.
+    return [
+      { source: '/admin/categories', destination: '/admin/taxonomy', permanent: false },
+      { source: '/admin/tags', destination: '/admin/taxonomy', permanent: false },
+      { source: '/admin/articles/:id/edit', destination: '/admin/articles/:id', permanent: false },
+    ];
+  },
   turbopack: {
     rules: {
       '*.css': {
