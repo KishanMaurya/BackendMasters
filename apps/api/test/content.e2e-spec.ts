@@ -17,7 +17,7 @@ import { CategoriesRepository } from '../src/modules/categories/categories.repos
 
 describe('Content API (no database)', () => {
   let app: INestApplication<App>;
-  const articles = { findPublished: vi.fn(), findBySlug: vi.fn() };
+  const articles = { findPublished: vi.fn(), findBySlug: vi.fn(), findAllSlugs: vi.fn() };
   const categories = { findAll: vi.fn() };
 
   beforeAll(async () => {
@@ -84,6 +84,13 @@ describe('Content API (no database)', () => {
     expect(articles.findPublished).not.toHaveBeenCalled();
   });
 
+  it('routes /articles/slugs to the slug list rather than to an article', async () => {
+    articles.findAllSlugs.mockResolvedValue(['a', 'b']);
+    const { body } = await get('/articles/slugs').expect(200);
+    expect(body.data).toEqual(['a', 'b']);
+    expect(articles.findBySlug).not.toHaveBeenCalled();
+  });
+
   it('returns 404 when no published article has the slug', async () => {
     articles.findBySlug.mockResolvedValue(null);
     const { body } = await get('/articles/missing').expect(404);
@@ -109,6 +116,8 @@ describe('Content API (no database)', () => {
     for (const path of [
       '/api/v1/articles',
       '/api/v1/articles/{slug}',
+      '/api/v1/articles/{slug}/related',
+      '/api/v1/articles/slugs',
       '/api/v1/categories',
       '/api/v1/tags',
     ]) {

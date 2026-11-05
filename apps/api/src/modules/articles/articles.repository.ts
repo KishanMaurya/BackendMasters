@@ -58,6 +58,19 @@ export class ArticlesRepository {
     return data ? toArticleDetail(data as unknown as ArticleDetailRow) : null;
   }
 
+  /** Every published slug, for prerendering. PostgREST caps a response at 1000 rows. */
+  async findAllSlugs(): Promise<string[]> {
+    const { data, error } = await this.supabase.publicClient
+      .from('articles')
+      .select('slug')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(1000);
+
+    if (error) throw databaseFailure('Listing article slugs', error);
+    return data.map((row) => row.slug);
+  }
+
   private async countPublished(query: ListArticlesQuery): Promise<number> {
     const { count, error } = await this.listQuery(query);
     if (error) throw databaseFailure('Counting articles', error);

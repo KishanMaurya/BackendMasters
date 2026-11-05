@@ -44,6 +44,11 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/articles" className={link}>
+                All articles
+              </Link>
+            </li>
+            <li>
               <Link href="/learn" className={link}>
                 Learning paths
               </Link>

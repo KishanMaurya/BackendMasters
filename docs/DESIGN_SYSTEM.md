@@ -101,6 +101,10 @@ The brief lists seven tools and also says to choose the lightest fit. This is ho
 
 **Measured at the end of Phase 2** (production build, 375px, 4x CPU throttle, slow 4G, empty cache): LCP 0.7 to 1.2s, CLS 0, under 5ms of blocking time.
 
+**Articles at the end of Phase 4** (same conditions): LCP 0.7s, CLS 0, 169 KB of JS. An article with a diagram also loads Mermaid (about 650 KB) after the page goes idle, with about 220ms of blocking time. It never affects articles without diagrams.
+
+**Code colours:** `github-dark-default` and `github-light-default`. The plain `github-dark` and `github-light` themes fail AA on our card colours (3.3:1 and 3.49:1). Ligatures are off in code, so readers see the characters they would type.
+
 ### How the system works
 
 - `src/styles/motion.css` holds all keyframes, inside a `no-preference` query, so reduced motion needs no extra code.

@@ -1,0 +1,338 @@
+/* Long-form reading styles. Nothing here animates, apart from small control feedback. */
+
+.bm-article {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+  color: color-mix(in srgb, var(--foreground) 88%, transparent);
+}
+.bm-article > * + * {
+  margin-top: 1.25rem;
+}
+.bm-article h2,
+.bm-article h3 {
+  color: var(--foreground);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+.bm-article h2 {
+  margin-top: 3rem;
+  font-size: 1.625rem;
+  line-height: 1.25;
+}
+.bm-article h3 {
+  margin-top: 2.25rem;
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+.bm-article > :first-child {
+  margin-top: 0;
+}
+.bm-heading-link:hover::after {
+  content: ' #';
+  color: var(--primary);
+}
+.bm-article p a,
+.bm-article li a,
+.bm-article td a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.bm-article strong {
+  color: var(--foreground);
+  font-weight: 600;
+}
+.bm-article ul,
+.bm-article ol {
+  padding-left: 1.5rem;
+}
+.bm-article ul {
+  list-style: disc;
+}
+.bm-article ol {
+  list-style: decimal;
+}
+.bm-article li + li {
+  margin-top: 0.375rem;
+}
+.bm-article li::marker {
+  color: var(--muted-foreground);
+}
+.bm-article blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1.25rem;
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+.bm-article hr {
+  margin-block: 2.5rem;
+}
+
+/* Show the characters readers actually type: != rather than a joined symbol. */
+.bm-article code,
+.bm-article pre,
+.bm-diagram-source {
+  font-variant-ligatures: none;
+}
+
+/* Inline code. Code inside a block sits in a pre, so it's unaffected. */
+.bm-article :not(pre) > code {
+  border-radius: 0.3rem;
+  background: var(--muted);
+  padding: 0.125em 0.375em;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  color: var(--foreground);
+  overflow-wrap: break-word;
+}
+
+/* Tables */
+.bm-table {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+.bm-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  overflow-wrap: normal;
+}
+.bm-table th {
+  background: var(--muted);
+  color: var(--foreground);
+  font-weight: 600;
+  text-align: left;
+}
+.bm-table th,
+.bm-table td {
+  padding: 0.625rem 0.875rem;
+  vertical-align: top;
+}
+.bm-table tr + tr td,
+.bm-table tbody tr:first-child td {
+  border-top: 1px solid var(--border);
+}
+
+/* Images */
+.bm-image {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+/* Notes */
+.bm-note {
+  --note: var(--muted-foreground);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--note);
+  border-radius: 0.5rem;
+  background: var(--card);
+  padding: 0.875rem 1.125rem;
+  font-size: 0.9688rem;
+  line-height: 1.65;
+}
+.bm-note > * + * {
+  margin-top: 0.5rem;
+}
+.bm-note[data-kind='tip'] {
+  --note: var(--primary);
+}
+.bm-note[data-kind='important'] {
+  --note: var(--chart-2);
+}
+.bm-note[data-kind='warning'] {
+  --note: var(--chart-3);
+}
+.bm-note[data-kind='caution'] {
+  --note: var(--destructive);
+}
+.bm-note-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--note);
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+/* Code blocks */
+.bm-code {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--card);
+}
+.bm-code-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding: 0.375rem 0.5rem 0.375rem 1rem;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+}
+.bm-code-body {
+  position: relative;
+}
+.bm-code pre {
+  overflow-x: auto;
+  padding: 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.65;
+  overflow-wrap: normal;
+}
+.bm-code[data-collapsed] pre {
+  max-height: 26rem;
+  overflow-y: hidden;
+}
+.bm-code[data-collapsed] .bm-code-body::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 4rem;
+  background: linear-gradient(transparent, var(--card));
+  pointer-events: none;
+}
+.bm-code-toggle {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  border-top: 1px solid var(--border);
+  padding: 0.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.8125rem;
+  transition: color var(--motion-fast);
+}
+.bm-code-toggle:hover {
+  color: var(--foreground);
+}
+.bm-code-toggle[aria-expanded='true'] svg {
+  transform: rotate(180deg);
+}
+.bm-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 0.375rem;
+  padding: 0.25rem 0.5rem;
+  color: var(--muted-foreground);
+  transition:
+    color var(--motion-fast),
+    background-color var(--motion-fast);
+}
+.bm-copy:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+.bm-copy[data-status='copied'] {
+  color: var(--primary);
+}
+.bm-copy[data-status='failed'] {
+  color: var(--destructive);
+}
+
+/* Shiki emits both palettes as variables, so changing theme needs no JavaScript. */
+.shiki span {
+  color: var(--shiki-light);
+}
+.dark .shiki span {
+  color: var(--shiki-dark);
+}
+
+/* Diagrams */
+.bm-diagram {
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--card);
+  padding: 1.25rem;
+}
+.bm-diagram-canvas {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+}
+.bm-diagram-canvas svg {
+  height: auto;
+  max-width: 100%;
+}
+.bm-diagram-source {
+  overflow-x: auto;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  overflow-wrap: normal;
+}
+.bm-diagram-expand,
+.bm-diagram-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  color: var(--muted-foreground);
+  transition:
+    color var(--motion-fast),
+    background-color var(--motion-fast);
+}
+.bm-diagram-expand:hover,
+.bm-diagram-close:hover {
+  background: var(--muted);
+  color: var(--foreground);
+}
+.bm-diagram-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(92vw, 72rem);
+  max-height: 90vh;
+  margin: auto;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--card);
+  color: var(--foreground);
+  padding: 3rem 1.5rem 1.5rem;
+}
+.bm-diagram-dialog::backdrop {
+  background: rgb(0 0 0 / 60%);
+}
+.bm-diagram-dialog svg {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bm-copy-icon {
+    animation: bm-pop var(--motion-base) var(--ease-out);
+  }
+  @keyframes bm-pop {
+    from {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+  }
+}
+
+@media print {
+  .bm-copy,
+  .bm-diagram-expand {
+    display: none;
+  }
+  .bm-code[data-collapsed] pre {
+    max-height: none;
+  }
+  .bm-code[data-collapsed] .bm-code-body::after {
+    display: none;
+  }
+}

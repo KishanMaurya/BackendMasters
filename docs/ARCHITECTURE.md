@@ -65,7 +65,7 @@ Each NestJS module follows `controller → service → repository`. Only reposit
 | D4  | **Publishing triggers on-demand revalidation**                                                | On publish or unpublish, the API calls a secret-protected `/api/revalidate` route that revalidates the cache tag, so changes appear in seconds without short cache lifetimes.                 |
 | D5  | **Supabase keys are scoped by purpose**                                                       | Public reads use the publishable key, so RLS applies. Admin writes forward the admin's JWT, so RLS applies again. The secret key is reserved for narrow server jobs (view counting, storage). |
 | D6  | **The API verifies JWTs locally through JWKS**                                                | No network round trip to Supabase on each request. `AdminGuard` then checks `profiles.role`.                                                                                                  |
-| D7  | **Markdown renders on the server**                                                            | `react-markdown` + `@shikijs/rehype` run in Server Components, so Shiki's grammars never reach the browser. Only the copy button, TOC and Mermaid are client code.                            |
+| D7  | **Markdown renders on the server**                                                            | `react-markdown` runs in Server Components with Shiki, so no grammar or theme reaches the browser. Only the copy button, table of contents, progress bar and Mermaid are client code.         |
 | D8  | **Markdown is always sanitized**                                                              | `rehype-sanitize` runs even though only admins author content, because a compromised admin account shouldn't become stored XSS for every reader.                                              |
 | D9  | **Search uses Postgres full-text**                                                            | A generated `tsvector` column with a GIN index, `websearch_to_tsquery` for queries, `pg_trgm` for suggestions. No extra search service to pay for or sync.                                    |
 | D10 | **Animation libraries load on demand**                                                        | CSS and SVG by default. See `DESIGN_SYSTEM.md` for the budget per library.                                                                                                                    |
@@ -117,7 +117,23 @@ All tables use UUID primary keys (`article_tags` uses its two foreign keys), `cr
 - Error: `{ "error": { "code": "...", "message": "...", "details": ... }, "meta": { ... } }`.
 - Envelope types live in `packages/shared`, so the web client and the API can't drift apart.
 
-## 6. Testing the data layer
+## 6. How article pages behave
+
+`/articles/[slug]` is a blocking route (`instant = false`), deliberately. A streamed page sends status 200 before the article is looked up, so a missing article could never return a real 404.
+
+| Situation                    | Reader                                          | Googlebot                          |
+| ---------------------------- | ----------------------------------------------- | ---------------------------------- |
+| Article known at build       | Instant, full HTML                              | Same                               |
+| Published after the build    | First request waits for the render, then cached | Same, with complete HTML and title |
+| Missing or draft             | Not-found page, status 200, `noindex`           | Status 404                         |
+| API down, article not cached | "Couldn't be loaded" page with retry            | Status 500, so it retries later    |
+
+Two consequences to know about:
+
+- `generateStaticParams` must return at least one item, so a placeholder slug is used when the API is unreachable or nothing is published. That keeps such builds from failing.
+- `use cache` results persist in `.next/cache` across builds. Publish-time revalidation (Phase 5) is what guarantees freshness. Delete that folder when testing against changed local data.
+
+## 7. Testing the data layer
 
 | Command            | Needs                                 | Proves                                        |
 | ------------------ | ------------------------------------- | --------------------------------------------- |
@@ -127,21 +143,21 @@ All tables use UUID primary keys (`article_tags` uses its two foreign keys), `cr
 
 The pgTAP suite was mutation-tested: exposing drafts, granting role updates and disabling RLS on a table each made it fail.
 
-## 7. Architectural risks
+## 8. Architectural risks
 
-| Risk                                                     | Impact                                                                                              | Mitigation                                                                                                                                                                                                               |
-| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **The API is down during a Vercel build**                | Failed deploy if prerendering depends on it                                                         | Tested: the build succeeds, pages say articles can't be loaded, and that result expires in about a minute so the site recovers without a redeploy. Crawlers receiving full article HTML still needs checking in Phase 4. |
-| **Cold starts on a low-cost API host**                   | Slow first ISR render                                                                               | Choose an always-on host. Vercel's cache means readers rarely hit the API directly.                                                                                                                                      |
-| **Latency between regions**                              | Every API call pays it                                                                              | Put the API and Supabase in the same region (Mumbai, `ap-south-1`, suits a `.in` audience).                                                                                                                              |
-| **Animation scope vs Core Web Vitals**                   | The brief lists GSAP, Motion, Lottie and React Flow, and loading all of them would hurt LCP and INP | Per-library budget, lazy loading, reduced-motion fallbacks (see `DESIGN_SYSTEM.md`).                                                                                                                                     |
-| **Phase 2 builds pages before Phase 3 creates the data** | Temptation to hardcode mock articles                                                                | Phase 2 uses real category config and honest empty states behind a typed data interface. No fixture articles ship.                                                                                                       |
-| **`/hld` and `/system-design` overlap**                  | Duplicate content, split SEO                                                                        | `/hld` covers building blocks (caching, sharding). `/system-design` covers end-to-end case studies. Articles link across.                                                                                                |
-| **Platform launches empty**                              | SEO and design both need real content                                                               | Content is a workstream of its own. See the open questions in `IMPLEMENTATION_PLAN.md`.                                                                                                                                  |
-| **Page transitions in the App Router**                   | `AnimatePresence` exit animations are unreliable across route changes                               | Use the browser View Transitions API with graceful fallback. Test in Phase 2.                                                                                                                                            |
-| **New major versions** (Nest 12, Next 16, TS 6)          | Examples online may be outdated                                                                     | Generated from the official scaffolds; exact versions committed through the lockfile.                                                                                                                                    |
+| Risk                                                     | Impact                                                                                              | Mitigation                                                                                                                                         |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **The API is down during a Vercel build**                | Failed deploy if prerendering depends on it                                                         | Tested: the build succeeds, pages say articles can't be loaded, and that result expires in about a minute so the site recovers without a redeploy. |
+| **Cold starts on a low-cost API host**                   | Slow first ISR render                                                                               | Choose an always-on host. Vercel's cache means readers rarely hit the API directly.                                                                |
+| **Latency between regions**                              | Every API call pays it                                                                              | Put the API and Supabase in the same region (Mumbai, `ap-south-1`, suits a `.in` audience).                                                        |
+| **Animation scope vs Core Web Vitals**                   | The brief lists GSAP, Motion, Lottie and React Flow, and loading all of them would hurt LCP and INP | Per-library budget, lazy loading, reduced-motion fallbacks (see `DESIGN_SYSTEM.md`).                                                               |
+| **Phase 2 builds pages before Phase 3 creates the data** | Temptation to hardcode mock articles                                                                | Phase 2 uses real category config and honest empty states behind a typed data interface. No fixture articles ship.                                 |
+| **`/hld` and `/system-design` overlap**                  | Duplicate content, split SEO                                                                        | `/hld` covers building blocks (caching, sharding). `/system-design` covers end-to-end case studies. Articles link across.                          |
+| **Platform launches empty**                              | SEO and design both need real content                                                               | Content is a workstream of its own. See the open questions in `IMPLEMENTATION_PLAN.md`.                                                            |
+| **Page transitions in the App Router**                   | `AnimatePresence` exit animations are unreliable across route changes                               | Use the browser View Transitions API with graceful fallback. Test in Phase 2.                                                                      |
+| **New major versions** (Nest 12, Next 16, TS 6)          | Examples online may be outdated                                                                     | Generated from the official scaffolds; exact versions committed through the lockfile.                                                              |
 
-## 8. Deployment
+## 9. Deployment
 
 - **Web:** Vercel project with root directory `apps/web`.
 - **API:** Container on an always-on Node host. Railway, Render, Fly.io and ECS Fargate all fit; to be chosen in Phase 7 (Dockerfile added then).
