@@ -1,6 +1,6 @@
 # BackendMasters — Tasks
 
-Status: **Phases 1, 2 and 3 complete. Phase 4 not started.** Check off items only once verified.
+Status: **Phases 1 to 4 complete. Phase 5 not started.** Check off items only once verified.
 
 ## Phase 0 — Planning
 
@@ -51,17 +51,18 @@ Status: **Phases 1, 2 and 3 complete. Phase 4 not started.** Check off items onl
 
 ## Phase 4 — Articles
 
-- [ ] Create `/articles/[slug]`: article cards link there and 404 until it exists
-- [ ] Listing with pagination and filters
-- [ ] Detail page layout
-- [ ] Markdown rendering with sanitization
-- [ ] Shiki highlighting (JS, TS, Go, Java, Python, SQL, Bash, JSON)
-- [ ] Copy button with success animation, expandable code
-- [ ] Mermaid diagrams (lazy, interactive)
-- [ ] Table of contents, reading progress, related articles, inline notes
+- [x] `/articles/[slug]` detail route, with real 404s for crawlers
+- [x] Listing with pagination and filters
+- [x] Detail page layout
+- [x] Markdown rendering with sanitization
+- [x] Shiki highlighting (JS, TS, Go, Java, Python, SQL, Bash, JSON)
+- [x] Copy button with success animation, expandable code
+- [x] Mermaid diagrams (lazy, interactive)
+- [x] Table of contents, reading progress, related articles, inline notes
 
 ## Phase 5 — Admin
 
+- [ ] Reject the reserved article slug `slugs`, which `GET /articles/slugs` already uses
 - [ ] Admin login and `AdminGuard`
 - [ ] Dashboard statistics
 - [ ] Article CRUD with Markdown editor and preview

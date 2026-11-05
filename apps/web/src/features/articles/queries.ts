@@ -1,6 +1,13 @@
 import { cacheLife, cacheTag } from 'next/cache';
-import type { ArticleSummary, CategorySlug, CategorySummary } from '@backendmasters/shared';
-import { apiFetch } from '@/lib/api/client';
+import type {
+  ArticleDetail,
+  ArticleSummary,
+  CategorySlug,
+  CategorySummary,
+  PaginationMeta,
+} from '@backendmasters/shared';
+import { ApiError, apiFetch } from '@/lib/api/client';
+import { toSearchParams, type ArticleFilters } from './listing-params';
 
 /**
  * The one place pages get article data from.
@@ -15,6 +22,7 @@ export type ArticleListResult = ArticleSummary[] | null;
 export const CONTENT_CACHE_TAG = 'content';
 
 const HOME_PAGE_SIZE = 6;
+const SLUG_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 
 function retrySoon() {
   cacheLife({ stale: 30, revalidate: 60, expire: 600 });
@@ -64,5 +72,67 @@ export async function getArticleCounts(): Promise<Partial<Record<CategorySlug, n
   } catch {
     retrySoon();
     return {};
+  }
+}
+
+export interface ArticlePage {
+  items: ArticleSummary[];
+  pagination: PaginationMeta;
+}
+
+export async function getArticlePage(filters: ArticleFilters): Promise<ArticlePage | null> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(CONTENT_CACHE_TAG);
+  try {
+    const { data, meta } = await apiFetch<ArticleSummary[], { pagination: PaginationMeta }>(
+      `/articles?${toSearchParams(filters).toString()}`,
+    );
+    return { items: data, pagination: meta.pagination };
+  } catch {
+    retrySoon();
+    return null;
+  }
+}
+
+/**
+ * Null means the article doesn't exist. Any other failure throws, so an outage shows the
+ * error page, is never cached, and never tells a crawler that a real article is gone.
+ */
+export async function getArticle(slug: string): Promise<ArticleDetail | null> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(CONTENT_CACHE_TAG);
+  if (!SLUG_PATTERN.test(slug)) return null;
+  try {
+    const { data } = await apiFetch<ArticleDetail>(`/articles/${slug}`);
+    return data;
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 404) return null;
+    throw error;
+  }
+}
+
+/** Related articles are optional, so a failure just leaves the section out. */
+export async function getRelatedArticles(slug: string): Promise<ArticleSummary[]> {
+  'use cache';
+  cacheLife('hours');
+  cacheTag(CONTENT_CACHE_TAG);
+  try {
+    const { data } = await apiFetch<ArticleSummary[]>(`/articles/${slug}/related`);
+    return data;
+  } catch {
+    retrySoon();
+    return [];
+  }
+}
+
+/** Used at build time only. Not cached, and an empty result is handled by the caller. */
+export async function getArticleSlugs(): Promise<string[]> {
+  try {
+    const { data } = await apiFetch<string[]>('/articles/slugs');
+    return data;
+  } catch {
+    return [];
   }
 }

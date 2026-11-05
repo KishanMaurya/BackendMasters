@@ -50,6 +50,13 @@ export async function ArticlesSection() {
         <section aria-labelledby="latest" className="border-t px-4 py-16 sm:px-6 sm:py-24">
           <div className="mx-auto max-w-7xl">
             <SectionHeading id="latest" eyebrow="Latest" title="Recently published." />
+            <Link
+              href="/articles"
+              className="mt-4 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+            >
+              View all articles
+              <ArrowRight aria-hidden className="size-3.5" />
+            </Link>
             <div className="mt-10">
               <ArticleGrid articles={recent} />
             </div>

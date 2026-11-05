@@ -96,6 +96,24 @@ describe('Content API (local Supabase)', () => {
     expect(categories.find((c) => c.slug === 'observability')?.articleCount).toBe(0);
   });
 
+  it('lists every published slug and no drafts', async () => {
+    const { body } = await get('/articles/slugs').expect(200);
+    expect([...(body.data as string[])].sort((a, b) => a.localeCompare(b))).toEqual([
+      'cache-stampede-explained',
+      'how-load-balancers-distribute-traffic',
+      'sliding-window-pattern',
+    ]);
+  });
+
+  it('returns related articles without the article itself or drafts', async () => {
+    const { body } = await get('/articles/cache-stampede-explained/related').expect(200);
+    expect(slugs(body)).toEqual([
+      'sliding-window-pattern',
+      'how-load-balancers-distribute-traffic',
+    ]);
+    await get(`/articles/${DRAFT}/related`).expect(404);
+  });
+
   it('lists tags', async () => {
     const { body } = await get('/tags').expect(200);
     expect(body.data.map((tag: { slug: string }) => tag.slug)).toContain('caching');

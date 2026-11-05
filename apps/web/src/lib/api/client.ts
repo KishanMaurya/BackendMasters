@@ -16,14 +16,17 @@ export class ApiError extends Error {
 }
 
 /** The single HTTP entry point to the BackendMasters API. Feature code calls this, never fetch(). */
-export async function apiFetch<T>(path: string, init?: RequestInit): Promise<ApiSuccess<T>> {
+export async function apiFetch<T, M extends object = object>(
+  path: string,
+  init?: RequestInit,
+): Promise<ApiSuccess<T, M>> {
   const response = await fetch(`${env.API_URL}${path}`, {
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     ...init,
     headers: { Accept: 'application/json', ...init?.headers },
   });
 
-  const body = (await response.json().catch(() => null)) as ApiSuccess<T> | ApiFailure | null;
+  const body = (await response.json().catch(() => null)) as ApiSuccess<T, M> | ApiFailure | null;
 
   if (!response.ok || body === null || 'error' in body) {
     const failure = body !== null && 'error' in body ? body.error : undefined;
