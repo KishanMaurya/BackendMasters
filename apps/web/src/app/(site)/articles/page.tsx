@@ -1,14 +1,16 @@
-import type { Metadata } from 'next';
 import { Suspense } from 'react';
 import { PageHeader } from '@/components/catalog/page-header';
 import { ArticleGridSkeleton } from '@/features/articles/components/article-card';
 import { ArticleListing } from '@/features/articles/components/article-listing';
+import { pageMetadata } from '@/features/seo/metadata';
 
-export const metadata: Metadata = {
+// Filtered views share this canonical address, so they don't compete with the main listing.
+export const metadata = pageMetadata({
   title: 'All Articles',
   description:
     'Every BackendMasters article on DSA, system design, cloud architecture and observability.',
-};
+  path: '/articles',
+});
 
 export default function ArticlesPage({ searchParams }: PageProps<'/articles'>) {
   return (

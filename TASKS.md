@@ -1,6 +1,6 @@
 # BackendMasters — Tasks
 
-Status: **Phases 1 to 6 complete. Phase 7 not started.** Check off items only once verified.
+Status: **Phases 1 to 7 are built. Launch steps that need your accounts or decisions are listed under Launch.** Check off items only once verified.
 
 ## Phase 0 — Planning
 
@@ -85,18 +85,39 @@ Status: **Phases 1 to 6 complete. Phase 7 not started.** Check off items only on
 - [x] React Flow architecture explorer
 - [x] Sample content for local development, with every DSA solution run in all four languages
 
-## Phase 7 — Launch
+## Phase 7 — Launch preparation
 
-- [ ] Global search, suggestions, category and tag filters (replace the `/search` holding page)
-- [ ] Metadata, canonical URLs, Open Graph
-- [ ] Sitemap, robots.txt, Article and Breadcrumb structured data
-- [ ] Full test pass
+- [x] Global search across articles, DSA problems and questions, ranked, with track and tag filters
+- [x] Search suggestions and a search dialog (Cmd+K)
+- [x] Metadata, canonical URLs, Open Graph, share image
+- [x] Sitemap, robots.txt, Article and Breadcrumb structured data
+- [x] Security headers
+- [x] Refresh the site when a scheduled article's date arrives
+- [x] Admin addresses from the brief redirect to the real ones
+- [x] Accessibility audit (axe, 27 pages in both themes, no violations)
+- [x] Full test pass
+- [x] Dockerfile for the API, Vercel settings, CI workflow and deployment guide (`docs/DEPLOYMENT.md`)
+- [ ] First-load JS under 170 KB on every page: listing pages are 161 to 167 KB, articles 173 KB, DSA problems 178 KB and `/hld` 181 KB
+
+## Launch
+
+These need your accounts or decisions.
+
+- [ ] Choose an API host
+- [ ] Create the hosted Supabase project and your administrator (`docs/ADMIN.md`)
+- [ ] Deploy web and API, configure backendmasters.in (`docs/DEPLOYMENT.md`)
+- [ ] Write or import launch content: articles, problems and questions
 - [ ] Contact address on `/about` and in the footer, if you want one beyond social links
-- [ ] Core Web Vitals and bundle budget (first-load JS is 170 to 190 KB against a 170 KB budget)
-- [ ] Published launch content: articles, problems and questions on the hosted project
-- [ ] Keep the language choice across DSA problems
-- [ ] Deploy web and API, configure backendmasters.in
-- [ ] Refresh the site when a scheduled article's date arrives
+- [ ] Submit the sitemap in Google Search Console
+
+## After launch
+
+- [ ] Count article views. Nothing writes to `article_views` yet, so the dashboard's view counts stay at 0
+- [ ] Reader accounts and bookmarks, if wanted. The table exists, with no screens
 - [ ] Redirects for changed article slugs
 - [ ] Remove unused images from storage
 - [ ] Multi-factor sign-in for administrators
+- [ ] Rate limits on search, and on sign-in per user rather than per server address
+- [ ] A content security policy
+- [ ] Count DSA problems and questions on their homepage track cards, which only count articles
+- [ ] Keep the language choice across DSA problems

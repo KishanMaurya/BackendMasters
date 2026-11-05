@@ -6,6 +6,10 @@ import { renderArticle } from '@/features/articles/rendered-article';
 import { interviewHref, plainPreview } from '@/features/interview/listing-params';
 import { getInterviewQuestion, getInterviewSlugs } from '@/features/interview/queries';
 import { codeFence } from '@/features/markdown/code-fence';
+import { JsonLd } from '@/features/seo/json-ld';
+import { pageMetadata } from '@/features/seo/metadata';
+import { articleData, breadcrumbData } from '@/features/seo/structured-data';
+import { env } from '@/lib/env';
 
 /** Blocking, for the same reason as article pages. See docs/ARCHITECTURE.md §6. */
 export const instant = false;
@@ -19,15 +23,20 @@ export async function generateStaticParams() {
   return slugs.length > 0 ? slugs.map((slug) => ({ slug })) : [{ slug: BUILD_PLACEHOLDER }];
 }
 
+const describe = (shortAnswer: string) =>
+  plainPreview(shortAnswer).slice(0, SEO_DESCRIPTION_LENGTH);
+
 export async function generateMetadata({
   params,
 }: PageProps<'/interview-questions/[slug]'>): Promise<Metadata> {
   const question = await getInterviewQuestion((await params).slug);
   if (!question) return {};
-  return {
+  return pageMetadata({
     title: question.title,
-    description: plainPreview(question.shortAnswer).slice(0, SEO_DESCRIPTION_LENGTH),
-  };
+    description: describe(question.shortAnswer),
+    path: `/interview-questions/${question.slug}`,
+    article: { publishedTime: question.publishedAt, modifiedTime: question.updatedAt },
+  });
 }
 
 async function Markdown({ source }: { source: string }) {
@@ -44,6 +53,22 @@ export default async function InterviewQuestionPage({
 
   return (
     <>
+      <JsonLd
+        data={articleData(env.NEXT_PUBLIC_SITE_URL, {
+          title: question.title,
+          description: describe(question.shortAnswer),
+          path: `/interview-questions/${question.slug}`,
+          publishedAt: question.publishedAt,
+          updatedAt: question.updatedAt,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbData(env.NEXT_PUBLIC_SITE_URL, [
+          { name: 'Home', path: '/' },
+          { name: 'Interview questions', path: '/interview-questions' },
+          { name: question.title, path: `/interview-questions/${question.slug}` },
+        ])}
+      />
       <header className="border-b">
         <div className="mx-auto max-w-4xl space-y-4 px-4 py-10 sm:px-6 sm:py-14">
           <nav aria-label="Breadcrumb">

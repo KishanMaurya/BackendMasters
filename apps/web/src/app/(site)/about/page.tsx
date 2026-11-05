@@ -1,15 +1,16 @@
 import { ArrowUpRight } from 'lucide-react';
-import type { Metadata } from 'next';
 import { BRAND } from '@backendmasters/shared';
 import { PageHeader } from '@/components/catalog/page-header';
 import { Eyebrow } from '@/components/catalog/section-heading';
 import { DatabaseIllustration } from '@/components/illustrations';
 import { SOCIAL_LINKS } from '@/config/site';
+import { pageMetadata } from '@/features/seo/metadata';
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: 'About',
   description: `${BRAND.name} is a learning platform for engineers who want to understand how real systems are built, designed and scaled.`,
-};
+  path: '/about',
+});
 
 const PRINCIPLES = [
   {

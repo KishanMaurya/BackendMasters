@@ -81,12 +81,12 @@ describe('resolvePublishDate', () => {
     expect(resolvePublishDate(undefined, '2026-01-01T00:00:00Z', now)).toBe('2026-01-01T00:00:00Z');
   });
 
-  it('uses now when never published', () => {
-    expect(resolvePublishDate(undefined, null, now)).toBe(now.toISOString());
+  it('leaves the date to the database when never published', () => {
+    expect(resolvePublishDate(undefined, null, now)).toBeNull();
   });
 
   it('publishes a formerly scheduled article now, rather than leaving it hidden', () => {
-    expect(resolvePublishDate(undefined, '2026-12-01T00:00:00Z', now)).toBe(now.toISOString());
+    expect(resolvePublishDate(undefined, '2026-12-01T00:00:00Z', now)).toBeNull();
   });
 });
 

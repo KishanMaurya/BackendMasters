@@ -26,7 +26,7 @@ export function Frame({
     <svg
       viewBox={viewBox}
       fill="none"
-      className={cn('h-auto w-full', live && 'bm-live', className)}
+      className={cn(live && 'bm-live', className ?? 'h-auto w-full')}
       {...(title ? { role: 'img', 'aria-label': title } : { 'aria-hidden': true })}
     >
       {children}

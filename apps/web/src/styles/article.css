@@ -145,6 +145,10 @@
   --note: var(--chart-2);
 }
 .bm-note[data-kind='warning'] {
+  /* The chart colour is only 3.6:1 on white. */
+  --note: #8f5d10;
+}
+.dark .bm-note[data-kind='warning'] {
   --note: var(--chart-3);
 }
 .bm-note[data-kind='caution'] {

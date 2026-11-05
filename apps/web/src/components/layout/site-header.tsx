@@ -1,5 +1,4 @@
-import { Search } from 'lucide-react';
-import Link from 'next/link';
+import { SearchTrigger } from '@/features/search/components/search-trigger';
 import { Logo } from './logo';
 import { MobileMenu } from './mobile-menu';
 import { NavLinks } from './nav-links';
@@ -14,13 +13,7 @@ export function SiteHeader() {
           <NavLinks />
         </nav>
         <div className="flex items-center gap-1">
-          <Link
-            href="/search"
-            className="hidden items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition-colors duration-(--motion-fast) hover:bg-muted hover:text-foreground sm:flex"
-          >
-            <Search className="size-4" />
-            Search
-          </Link>
+          <SearchTrigger />
           <ThemeToggle />
           <div className="lg:hidden">
             <MobileMenu />

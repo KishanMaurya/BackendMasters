@@ -11,6 +11,7 @@ import { CategoriesModule } from './modules/categories/categories.module.js';
 import { DsaModule } from './modules/dsa/dsa.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { InterviewModule } from './modules/interview/interview.module.js';
+import { SearchModule } from './modules/search/search.module.js';
 import { TagsModule } from './modules/tags/tags.module.js';
 import { SupabaseModule } from './supabase/supabase.module.js';
 
@@ -24,6 +25,7 @@ import { SupabaseModule } from './supabase/supabase.module.js';
     ArticlesModule,
     DsaModule,
     InterviewModule,
+    SearchModule,
     AdminModule,
   ],
   providers: [

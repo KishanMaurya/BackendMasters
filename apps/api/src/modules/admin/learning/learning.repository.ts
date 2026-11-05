@@ -19,7 +19,8 @@ import {
   type AdminQuestionRow,
 } from './learning.mapper.js';
 
-export type StatusChange = { status: 'draft' } | { status: 'published'; publishedAt: string };
+export type StatusChange =
+  { status: 'draft' } | { status: 'published'; publishedAt: string | null };
 
 const STALE_SAVE = { code: 'BM409', message: 'stale save' };
 

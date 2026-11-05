@@ -124,6 +124,7 @@ export async function ArticleListing({
             <p className="mb-5 font-mono text-xs text-muted-foreground">
               {result.pagination.total} {result.pagination.total === 1 ? 'article' : 'articles'}
             </p>
+            <h2 className="sr-only">Results</h2>
             <ArticleGrid articles={result.items} />
             <Pagination filters={filters} total={result.pagination.total} />
           </>

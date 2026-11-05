@@ -103,7 +103,9 @@ The brief lists seven tools and also says to choose the lightest fit. This is ho
 
 **Articles at the end of Phase 4** (same conditions): LCP 0.7s, CLS 0, 169 KB of JS. An article with a diagram also loads Mermaid (about 650 KB) after the page goes idle, with about 220ms of blocking time. It never affects articles without diagrams.
 
-**Learning modules at the end of Phase 6** (same conditions): LCP 0.7 to 1.4s, CLS 0.011 or less, under 25ms of blocking time. First-load JS is 170 to 190 KB, a little over budget, and `/system-design` adds about 60 KB for React Flow once scrolled to.
+**Measured at the end of Phase 7** (same conditions): LCP 0.5 to 1.3s, CLS 0.011 or less, under 40ms of blocking time. First-load JS is 161 to 167 KB on listing pages, 173 KB on articles, 178 KB on DSA problems and 181 KB on `/hld`, so some pages are still over budget. React alone accounts for about 133 KB of it. `/system-design` adds about 60 KB for React Flow once scrolled to.
+
+**Class names:** `lib/utils.ts` joins classes and doesn't resolve Tailwind conflicts, which saves 15 KB on every page. If two classes conflict, remove one.
 
 **Code colours:** `github-dark-default` and `github-light-default`. The plain `github-dark` and `github-light` themes fail AA on our card colours (3.3:1 and 3.49:1). Ligatures are off in code, so readers see the characters they would type.
 

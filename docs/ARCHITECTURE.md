@@ -144,6 +144,8 @@ Measured on a production build. Status 404 needs the empty result to be in the c
 
 Other things to know:
 
+- **Publish dates come from the database clock.** Publishing now leaves the date empty for a trigger to fill. RLS compares against the database's clock, so a date from the API's clock could hide a new article for as long as the two differ.
+- **Scheduled articles are noticed by a check in the API,** once a minute, which then refreshes the site. If the site can't be reached, the same period is checked again next time.
 - `generateStaticParams` must return at least one item, so a placeholder slug is used when the API is unreachable or nothing is published. That keeps such builds from failing.
 - `use cache` results persist in `.next/cache` across builds. Delete that folder when testing against changed local data without going through the admin area.
 - **Content changes appear on the next request.** The API calls `/api/revalidate`, which expires the `content` cache tag with no stale period. Every public query carries that tag. The route's tag is fixed, so its secret can't be used for anything else.
@@ -160,13 +162,14 @@ Other things to know:
 - **Sections are Markdown.** Problems and questions store Markdown and render through the same sanitized pipeline as articles. Code goes through `codeFence`, so backticks in code can't break out of the block.
 - **Publishing is checked.** A DSA problem needs its core sections and all four languages. A question needs a short answer. Changes clear the same `content` cache tag as articles.
 - **The system design format is guidance.** The editor shows which of the ten sections have no heading yet for HLD and system design articles, and can insert the outline. It doesn't block publishing, because a short building-block article may not need all ten.
+- **Search covers all three.** `search_content` runs as the caller, so RLS hides drafts, and ranks with `ts_rank`. Tags only exist on articles, so a tag filter limits results to articles. `search_suggestions` matches titles only.
 - **Sample content is local only.** `supabase/seed.sql` holds it, and `supabase db push` doesn't run that file.
 
 ## 8. Testing the data layer
 
 | Command            | Needs                                 | Proves                                                             |
 | ------------------ | ------------------------------------- | ------------------------------------------------------------------ |
-| `npm run db:test`  | Local Supabase                        | 50 pgTAP tests of who can read and write what                      |
+| `npm run db:test`  | Local Supabase                        | 53 pgTAP tests of who can read and write what                      |
 | `npm run test:db`  | Local Supabase, seed, `apps/api/.env` | The real API against the real database, signed in as real accounts |
 | `npm run test:e2e` | Nothing                               | HTTP behaviour with repositories faked                             |
 
@@ -189,6 +192,8 @@ The pgTAP suite was mutation-tested: exposing drafts, granting role updates and 
 ## 10. Deployment
 
 - **Web:** Vercel project with root directory `apps/web`.
-- **API:** Container on an always-on Node host. Railway, Render, Fly.io and ECS Fargate all fit; to be chosen in Phase 7 (Dockerfile added then).
+- **API:** Container on an always-on Node host. Railway, Render, Fly.io and ECS Fargate all fit; still to be chosen. The Dockerfile is `apps/api/Dockerfile`.
 - **Database:** Supabase. Migrations in `supabase/migrations` are the source of truth, applied with `supabase db push`.
 - **Domains:** `backendmasters.in` → web, `api.backendmasters.in` → API.
+
+Steps are in `DEPLOYMENT.md`.
