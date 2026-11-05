@@ -1,7 +1,7 @@
 -- Proves the access rules from docs/ARCHITECTURE.md §4. Run with: npm run db:test
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(46);
+select plan(50);
 
 -- Fixtures, created as the privileged test role.
 insert into auth.users (id, email, raw_user_meta_data) values
@@ -249,6 +249,33 @@ select throws_ok(
 select lives_ok(
   $$ insert into storage.objects (bucket_id, name) values ('article-covers', 'admin.png') $$,
   'an administrator can add an image'
+);
+
+-- Phase 6: reserved slugs and the topic tags that category pages depend on.
+reset role;
+select set_config('request.jwt.claims', '', true);
+
+select throws_ok(
+  $$ insert into public.dsa_problems (slug, title, category_id, topic, difficulty, problem_statement)
+     values ('topics', 'Reserved', (select id from public.categories where slug = 'dsa'), 'arrays', 'easy', 'x') $$,
+  '23514', null, 'a reserved DSA slug is refused by the database'
+);
+select throws_ok(
+  $$ insert into public.interview_questions
+       (slug, title, category_id, technology, topic, difficulty, short_answer)
+     values ('facets', 'Reserved', (select id from public.categories where slug = 'dsa'), 'x', 'x', 'easy', 'x') $$,
+  '23514', null, 'a reserved question slug is refused by the database'
+);
+select ok(
+  exists (select 1 from public.tags where slug = 'rate-limiter'),
+  'topic tags are created by the migration, so they reach production'
+);
+
+set local role anon;
+select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select is_empty(
+  $$ select 1 from public.dsa_problems where status = 'draft' $$,
+  'anonymous callers cannot see draft problems'
 );
 
 select * from finish();

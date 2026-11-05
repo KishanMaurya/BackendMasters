@@ -28,7 +28,7 @@ export interface Category {
   related: readonly CategorySlug[];
 }
 
-const SYSTEM_DESIGN_ANATOMY = [
+export const SYSTEM_DESIGN_ANATOMY = [
   'Problem statement',
   'Functional requirements',
   'Non-functional requirements',

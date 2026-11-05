@@ -11,6 +11,16 @@ import { AppModule } from '../src/app.module.js';
 import { configureApp } from '../src/app.setup.js';
 
 const DRAFT = 'draft-sre-golden-signals';
+const PUBLISHED_NEWEST_FIRST = [
+  'sliding-window-pattern',
+  'cache-stampede-explained',
+  'how-load-balancers-distribute-traffic',
+  'rate-limiter-system-design',
+  'strategy-pattern-in-practice',
+  'sqs-dead-letter-queues',
+  'sli-slo-sla-explained',
+  'idempotency-keys-for-safe-retries',
+];
 
 describe('Content API (local Supabase)', () => {
   let app: INestApplication<App>;
@@ -36,12 +46,8 @@ describe('Content API (local Supabase)', () => {
 
   it('lists published articles newest first and hides drafts', async () => {
     const { body } = await get('/articles').expect(200);
-    expect(slugs(body)).toEqual([
-      'sliding-window-pattern',
-      'cache-stampede-explained',
-      'how-load-balancers-distribute-traffic',
-    ]);
-    expect(body.meta.pagination.total).toBe(3);
+    expect(slugs(body)).toEqual(PUBLISHED_NEWEST_FIRST);
+    expect(body.meta.pagination.total).toBe(PUBLISHED_NEWEST_FIRST.length);
     expect(body.data[0]).toMatchObject({ categorySlug: 'dsa', categoryName: 'DSA & Algorithms' });
   });
 
@@ -67,25 +73,37 @@ describe('Content API (local Supabase)', () => {
     expect(slugs(byTag)).toEqual([
       'cache-stampede-explained',
       'how-load-balancers-distribute-traffic',
+      'sli-slo-sla-explained',
     ]);
-    expect(byTag.meta.pagination.total).toBe(2);
+    expect(byTag.meta.pagination.total).toBe(3);
     expect(slugs((await get('/articles?difficulty=medium').expect(200)).body)).toEqual([
       'cache-stampede-explained',
+      'rate-limiter-system-design',
+      'sqs-dead-letter-queues',
+      'idempotency-keys-for-safe-retries',
     ]);
-    expect(slugs((await get('/articles?featured=false').expect(200)).body)).toEqual([
-      'sliding-window-pattern',
+    expect(slugs((await get('/articles?featured=true').expect(200)).body)).toEqual([
+      'cache-stampede-explained',
+      'how-load-balancers-distribute-traffic',
     ]);
-    expect((await get('/articles?category=observability').expect(200)).body.data).toEqual([]);
+    // The draft in this category stays hidden.
+    expect(slugs((await get('/articles?category=observability').expect(200)).body)).toEqual([
+      'sli-slo-sla-explained',
+    ]);
   });
 
   it('paginates, including past the last page', async () => {
     const second = (await get('/articles?page=2&pageSize=1').expect(200)).body;
     expect(slugs(second)).toEqual(['cache-stampede-explained']);
-    expect(second.meta.pagination).toEqual({ page: 2, pageSize: 1, total: 3 });
+    expect(second.meta.pagination).toEqual({
+      page: 2,
+      pageSize: 1,
+      total: PUBLISHED_NEWEST_FIRST.length,
+    });
 
     const beyond = (await get('/articles?page=9').expect(200)).body;
     expect(beyond.data).toEqual([]);
-    expect(beyond.meta.pagination.total).toBe(3);
+    expect(beyond.meta.pagination.total).toBe(PUBLISHED_NEWEST_FIRST.length);
   });
 
   it('keeps database categories in sync with the shared slugs, and excludes drafts from counts', async () => {
@@ -93,21 +111,21 @@ describe('Content API (local Supabase)', () => {
     const categories = body.data as CategorySummary[];
     expect(categories.map((category) => category.slug)).toEqual([...CATEGORY_SLUGS]);
     expect(categories.find((c) => c.slug === 'hld')?.articleCount).toBe(1);
-    expect(categories.find((c) => c.slug === 'observability')?.articleCount).toBe(0);
+    // One published and one draft.
+    expect(categories.find((c) => c.slug === 'observability')?.articleCount).toBe(1);
   });
 
   it('lists every published slug and no drafts', async () => {
     const { body } = await get('/articles/slugs').expect(200);
-    expect([...(body.data as string[])].sort((a, b) => a.localeCompare(b))).toEqual([
-      'cache-stampede-explained',
-      'how-load-balancers-distribute-traffic',
-      'sliding-window-pattern',
-    ]);
+    expect(body.data).toEqual(PUBLISHED_NEWEST_FIRST);
+    expect(body.data).not.toContain(DRAFT);
   });
 
   it('returns related articles without the article itself or drafts', async () => {
     const { body } = await get('/articles/cache-stampede-explained/related').expect(200);
+    // Same category first, then topped up with the newest.
     expect(slugs(body)).toEqual([
+      'rate-limiter-system-design',
       'sliding-window-pattern',
       'how-load-balancers-distribute-traffic',
     ]);

@@ -33,6 +33,20 @@ const ROUTES: ['get' | 'post' | 'put' | 'patch' | 'delete', string][] = [
   ['patch', `/admin/tags/${ID}`],
   ['delete', `/admin/tags/${ID}`],
   ['post', '/admin/media/images'],
+  ['get', '/admin/dsa-problems'],
+  ['get', `/admin/dsa-problems/${ID}`],
+  ['post', '/admin/dsa-problems'],
+  ['put', `/admin/dsa-problems/${ID}`],
+  ['delete', `/admin/dsa-problems/${ID}`],
+  ['post', `/admin/dsa-problems/${ID}/publish`],
+  ['post', `/admin/dsa-problems/${ID}/unpublish`],
+  ['get', '/admin/interview-questions'],
+  ['get', `/admin/interview-questions/${ID}`],
+  ['post', '/admin/interview-questions'],
+  ['put', `/admin/interview-questions/${ID}`],
+  ['delete', `/admin/interview-questions/${ID}`],
+  ['post', `/admin/interview-questions/${ID}/publish`],
+  ['post', `/admin/interview-questions/${ID}/unpublish`],
 ];
 
 const VALID_ARTICLE = {
@@ -152,6 +166,59 @@ describe('Admin API (no database)', () => {
       .attach('file', Buffer.from('<svg onload="alert(1)"/>'), {
         filename: 'photo.png',
         contentType: 'image/png',
+      })
+      .expect(400);
+  });
+
+  it.each([
+    ['a reserved slug', { slug: 'topics' }],
+    ['an unknown topic', { topic: 'alchemy' }],
+    ['a malformed example', { examples: [{ input: 1 }] }],
+    ['a missing language', { solutions: { javascript: '', typescript: '', java: '' } }],
+    ['a status, which only publish may change', { status: 'published' }],
+  ])('rejects a DSA problem with %s', async (_, change) => {
+    await asAdmin('post', '/admin/dsa-problems')
+      .send({
+        slug: 'a-problem',
+        title: 'A problem',
+        topic: 'arrays',
+        difficulty: 'easy',
+        problemStatement: '',
+        examples: [],
+        constraints: [],
+        bruteForceApproach: '',
+        optimizedApproach: '',
+        explanation: '',
+        timeComplexity: '',
+        spaceComplexity: '',
+        dryRun: '',
+        solutions: { javascript: '', typescript: '', java: '', go: '' },
+        ...change,
+      })
+      .expect(400);
+  });
+
+  it.each([
+    ['a reserved slug', { slug: 'facets' }],
+    ['a blank technology', { technology: '  ' }],
+    ['a bad related id', { relatedQuestionIds: ['nope'] }],
+    ['a made-up difficulty', { difficulty: 'impossible' }],
+  ])('rejects an interview question with %s', async (_, change) => {
+    await asAdmin('post', '/admin/interview-questions')
+      .send({
+        slug: 'a-question',
+        title: 'A question',
+        technology: 'Node.js',
+        topic: 'Streams',
+        interviewCategory: null,
+        difficulty: 'easy',
+        shortAnswer: '',
+        detailedExplanation: '',
+        practicalExample: '',
+        codeExample: null,
+        codeLanguage: null,
+        relatedQuestionIds: [],
+        ...change,
       })
       .expect(400);
   });

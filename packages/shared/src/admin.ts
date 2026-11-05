@@ -1,8 +1,10 @@
 /** Contracts for the content-management API. Everything here sits behind AdminGuard. */
-import type { CategorySlug, Difficulty } from './content.js';
+import type { CategorySlug, Difficulty, DsaExample, DsaSolutions, DsaTopic } from './content.js';
 
 /** Reserved because GET /articles/slugs would shadow an article with this slug. */
 export const RESERVED_ARTICLE_SLUGS: readonly string[] = ['slugs'];
+export const RESERVED_DSA_SLUGS: readonly string[] = ['slugs', 'topics'];
+export const RESERVED_QUESTION_SLUGS: readonly string[] = ['slugs', 'facets'];
 
 /** Where an article stands for readers. "scheduled" is published with a future date. */
 export type ArticleState = 'draft' | 'scheduled' | 'published';
@@ -97,9 +99,60 @@ export interface DashboardStats {
   views: { total: number; last30Days: number };
   categories: number;
   tags: number;
+  dsaProblems: number;
+  interviewQuestions: number;
   recent: AdminArticleListItem[];
 }
 
 export interface UploadedImage {
   url: string;
 }
+
+export type ContentStatus = 'draft' | 'published';
+
+export interface AdminDsaProblem {
+  id: string;
+  slug: string;
+  title: string;
+  topic: DsaTopic;
+  difficulty: Difficulty;
+  status: ContentStatus;
+  publishedAt: string | null;
+  updatedAt: string;
+  problemStatement: string;
+  examples: DsaExample[];
+  constraints: string[];
+  bruteForceApproach: string;
+  optimizedApproach: string;
+  explanation: string;
+  timeComplexity: string;
+  spaceComplexity: string;
+  dryRun: string;
+  solutions: DsaSolutions;
+}
+
+export type DsaProblemInput = Omit<AdminDsaProblem, 'id' | 'status' | 'publishedAt' | 'updatedAt'>;
+
+export interface AdminInterviewQuestion {
+  id: string;
+  slug: string;
+  title: string;
+  technology: string;
+  topic: string;
+  interviewCategory: string | null;
+  difficulty: Difficulty;
+  status: ContentStatus;
+  publishedAt: string | null;
+  updatedAt: string;
+  shortAnswer: string;
+  detailedExplanation: string;
+  practicalExample: string;
+  codeExample: string | null;
+  codeLanguage: string | null;
+  relatedQuestionIds: string[];
+}
+
+export type InterviewQuestionInput = Omit<
+  AdminInterviewQuestion,
+  'id' | 'status' | 'publishedAt' | 'updatedAt'
+>;

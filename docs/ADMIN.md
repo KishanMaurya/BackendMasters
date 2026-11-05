@@ -43,11 +43,19 @@ The secret key belongs on the API host only. Never add it to the web app.
 
 If the editor warns that the site could not be refreshed, the change is saved, and the site catches up within an hour.
 
+## Learning modules
+
+- **DSA problems** (`/admin/dsa`): publishing needs a statement, an example, the optimized approach, both complexities and all four languages. The error lists whatever is missing.
+- **Interview questions** (`/admin/interview`): publishing needs a short answer. Technology, topic and interview category become filter options as soon as a published question uses them, so keep their spelling consistent.
+- **Topic pages:** to list an article under a topic such as "Rate limiting", give it the tag with that name.
+- **Interactive explainers in an article:** add a code block with the language `explainer` and one of these names on its own line: `load-balancer`, `caching`, `sharding`, `kafka`, `tracing`, `sliding-window`.
+
 ## Known limits
 
 - **Changing a published slug breaks links to it.** The editor warns about this, but there are no redirects yet.
 - **Replaced or removed images stay in storage.** Nothing is deleted automatically, so unused files will build up slowly.
 - **Scheduled articles appear late.** Nothing refreshes the site at the scheduled moment, so an article goes live for readers when the hourly cache next expires.
 - **Category descriptions** are edited here, but the category pages use their own text from `features/catalog/categories.ts`. Names appear on article cards and pages.
+- **DSA problems and questions publish immediately.** Only articles can be scheduled, and the preview button is only on the article editor. Check a problem or question with View live after publishing.
 - **No multi-factor sign-in yet.** Consider turning it on before launch, since this account can change everything on the site.
 - **Sign-in attempts are rate limited by Supabase per IP address.** They all come from the web server's address, so repeated failed attempts by anyone could briefly lock out the real administrator.

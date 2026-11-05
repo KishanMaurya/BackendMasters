@@ -148,17 +148,31 @@ Other things to know:
 - `use cache` results persist in `.next/cache` across builds. Delete that folder when testing against changed local data without going through the admin area.
 - **Content changes appear on the next request.** The API calls `/api/revalidate`, which expires the `content` cache tag with no stale period. Every public query carries that tag. The route's tag is fixed, so its secret can't be used for anything else.
 
-## 7. Testing the data layer
+## 7. How the learning modules work
+
+| Track                                                | Content                                                          | Where it lives                                                               |
+| ---------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| DSA                                                  | Problems with examples, approaches, a dry run and four languages | `dsa_problems`, `/dsa`, `/dsa/[slug]`                                        |
+| Interview                                            | Searchable questions with filters                                | `interview_questions`, `/interview-questions`, `/interview-questions/[slug]` |
+| LLD, HLD, system design, AWS, observability, backend | Articles grouped into topics                                     | `articles`, by tag                                                           |
+
+- **Topics are tags.** A topic's tag slug is its name in `features/catalog/categories.ts` run through `topicAnchor`, and a migration creates those tags so they exist in production. A topic links to its articles as soon as one is published with that tag. Tag an article with the matching topic, or it won't appear under that topic.
+- **Sections are Markdown.** Problems and questions store Markdown and render through the same sanitized pipeline as articles. Code goes through `codeFence`, so backticks in code can't break out of the block.
+- **Publishing is checked.** A DSA problem needs its core sections and all four languages. A question needs a short answer. Changes clear the same `content` cache tag as articles.
+- **The system design format is guidance.** The editor shows which of the ten sections have no heading yet for HLD and system design articles, and can insert the outline. It doesn't block publishing, because a short building-block article may not need all ten.
+- **Sample content is local only.** `supabase/seed.sql` holds it, and `supabase db push` doesn't run that file.
+
+## 8. Testing the data layer
 
 | Command            | Needs                                 | Proves                                                             |
 | ------------------ | ------------------------------------- | ------------------------------------------------------------------ |
-| `npm run db:test`  | Local Supabase                        | 46 pgTAP tests of who can read and write what                      |
+| `npm run db:test`  | Local Supabase                        | 50 pgTAP tests of who can read and write what                      |
 | `npm run test:db`  | Local Supabase, seed, `apps/api/.env` | The real API against the real database, signed in as real accounts |
 | `npm run test:e2e` | Nothing                               | HTTP behaviour with repositories faked                             |
 
 The pgTAP suite was mutation-tested: exposing drafts, granting role updates and disabling RLS on a table each made it fail.
 
-## 8. Architectural risks
+## 9. Architectural risks
 
 | Risk                                                     | Impact                                                                                              | Mitigation                                                                                                                                         |
 | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -172,7 +186,7 @@ The pgTAP suite was mutation-tested: exposing drafts, granting role updates and 
 | **Page transitions in the App Router**                   | `AnimatePresence` exit animations are unreliable across route changes                               | Use the browser View Transitions API with graceful fallback. Test in Phase 2.                                                                      |
 | **New major versions** (Nest 12, Next 16, TS 6)          | Examples online may be outdated                                                                     | Generated from the official scaffolds; exact versions committed through the lockfile.                                                              |
 
-## 9. Deployment
+## 10. Deployment
 
 - **Web:** Vercel project with root directory `apps/web`.
 - **API:** Container on an always-on Node host. Railway, Render, Fly.io and ECS Fargate all fit; to be chosen in Phase 7 (Dockerfile added then).

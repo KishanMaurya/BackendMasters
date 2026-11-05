@@ -43,6 +43,11 @@ import {
   uploadImage,
 } from '../actions';
 import { articleSchema, toFieldErrors, type FieldErrors } from '../schemas';
+import {
+  missingSections,
+  SYSTEM_DESIGN_CATEGORIES,
+  systemDesignOutline,
+} from '../system-design-outline';
 import { slugify } from '../slugify';
 import { ConfirmButton } from './confirm-button';
 import { Field, INPUT_CLASS, Notice } from './field';
@@ -260,6 +265,12 @@ export function ArticleEditor({
     applyEdit(applyMarkdown(input.content, element.selectionStart, element.selectionEnd, action));
   }
 
+  function insertOutline() {
+    const separator = input.content.trim() ? '\n\n' : '';
+    update('content', `${input.content.trimEnd()}${separator}${systemDesignOutline()}`);
+    setMode('write');
+  }
+
   function handleEditorKeys(event: KeyboardEvent<HTMLTextAreaElement>) {
     if (!(event.metaKey || event.ctrlKey)) return;
     const key = event.key.toLowerCase();
@@ -315,6 +326,10 @@ export function ArticleEditor({
   }
 
   const state = article?.state ?? 'draft';
+  const categorySlug = categories.find((category) => category.id === input.categoryId)?.slug ?? '';
+  const missing = SYSTEM_DESIGN_CATEGORIES.includes(categorySlug)
+    ? missingSections(input.content)
+    : null;
   const scheduleAt =
     scheduleEdit ??
     (isBrowser && state === 'scheduled' ? toLocalInput(article?.publishedAt ?? null) : '');
@@ -617,6 +632,34 @@ export function ArticleEditor({
               {errors.tagIds && <p className="text-xs text-destructive">{errors.tagIds}</p>}
             </fieldset>
           </Panel>
+
+          {missing && (
+            <Panel title="System design format">
+              {missing.length === 0 ? (
+                <p className="text-sm">All ten sections are here.</p>
+              ) : (
+                <>
+                  <p className="text-sm text-muted-foreground">
+                    {missing.length} of 10 sections have no heading yet:
+                  </p>
+                  <ul className="list-disc space-y-0.5 pl-5 text-sm">
+                    {missing.map((section) => (
+                      <li key={section}>{section}</li>
+                    ))}
+                  </ul>
+                  {missing.length === 10 && (
+                    <button
+                      type="button"
+                      onClick={insertOutline}
+                      className={buttonVariants({ variant: 'outline', className: 'w-full' })}
+                    >
+                      Insert outline
+                    </button>
+                  )}
+                </>
+              )}
+            </Panel>
+          )}
 
           <Panel title="Cover image">
             {input.coverImageUrl && (

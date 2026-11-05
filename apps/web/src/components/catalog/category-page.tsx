@@ -1,13 +1,14 @@
 import { ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Suspense } from 'react';
+import { Suspense, type ReactNode } from 'react';
 import type { CategorySlug } from '@backendmasters/shared';
 import { CATEGORY_ILLUSTRATIONS } from '@/components/illustrations';
 import { ArticleGridSkeleton } from '@/features/articles/components/article-card';
 import { ArticleGrid } from '@/features/articles/components/article-grid';
 import { ArticlesUnavailable } from '@/features/articles/components/articles-unavailable';
-import { getArticlesByCategory } from '@/features/articles/queries';
+import { listingHref } from '@/features/articles/listing-params';
+import { getArticlesByCategory, getTagUsage } from '@/features/articles/queries';
 import { getCategory, topicAnchor } from '@/features/catalog/categories';
 import { PageHeader } from './page-header';
 import { Eyebrow } from './section-heading';
@@ -17,7 +18,19 @@ export function categoryMetadata(slug: CategorySlug): Metadata {
   return { title: category.title, description: category.lede };
 }
 
-export function CategoryPage({ slug }: { slug: CategorySlug }) {
+/**
+ * `children` replaces the topic list, for tracks with their own listing. `interactive` holds
+ * explainers, shown in full width below.
+ */
+export function CategoryPage({
+  slug,
+  children,
+  interactive,
+}: {
+  slug: CategorySlug;
+  children?: ReactNode;
+  interactive?: ReactNode;
+}) {
   const category = getCategory(slug);
   const Illustration = CATEGORY_ILLUSTRATIONS[slug];
 
@@ -31,26 +44,13 @@ export function CategoryPage({ slug }: { slug: CategorySlug }) {
       />
 
       <div className="mx-auto grid w-full max-w-7xl gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1.6fr_1fr] lg:gap-16">
-        <section aria-labelledby="topics">
-          <Eyebrow>{`${category.topics.length} planned`}</Eyebrow>
-          <h2 id="topics" className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
-            {category.topicsTitle}
-          </h2>
-          <ol className="mt-6 grid gap-x-6 border-t sm:grid-cols-2">
-            {category.topics.map((topic, index) => (
-              <li
-                key={topic}
-                id={topicAnchor(topic)}
-                className="flex items-baseline gap-4 border-b py-3 target:text-primary"
-              >
-                <span aria-hidden className="font-mono text-xs text-muted-foreground">
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                {topic}
-              </li>
-            ))}
-          </ol>
-        </section>
+        {children ?? (
+          <section aria-labelledby="topics">
+            <Suspense fallback={<TopicList slug={slug} />}>
+              <TopicsWithArticles slug={slug} />
+            </Suspense>
+          </section>
+        )}
 
         <section aria-labelledby="anatomy">
           <Eyebrow>The format</Eyebrow>
@@ -77,6 +77,24 @@ export function CategoryPage({ slug }: { slug: CategorySlug }) {
         </section>
       </div>
 
+      {interactive && (
+        <section aria-labelledby="interactive" className="border-y bg-card/50">
+          <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-14 sm:px-6">
+            <div>
+              <Eyebrow>Interactive</Eyebrow>
+              <h2
+                id="interactive"
+                className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl"
+              >
+                See it working
+              </h2>
+            </div>
+            {interactive}
+          </div>
+        </section>
+      )}
+
+      <div className="pt-14" />
       <Suspense
         fallback={
           <div className="mx-auto w-full max-w-7xl px-4 pb-14 sm:px-6">
@@ -112,6 +130,57 @@ export function CategoryPage({ slug }: { slug: CategorySlug }) {
           })}
         </div>
       </section>
+    </>
+  );
+}
+
+async function TopicsWithArticles({ slug }: { slug: CategorySlug }) {
+  return <TopicList slug={slug} usage={await getTagUsage(slug)} />;
+}
+
+/** A topic links to its articles once it has some, and the list stays useful until then. */
+function TopicList({ slug, usage = {} }: { slug: CategorySlug; usage?: Record<string, number> }) {
+  const category = getCategory(slug);
+  const published = category.topics.filter((topic) => usage[topicAnchor(topic)]).length;
+
+  return (
+    <>
+      <Eyebrow>
+        {published > 0
+          ? `${published} of ${category.topics.length} published`
+          : `${category.topics.length} planned`}
+      </Eyebrow>
+      <h2 id="topics" className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">
+        {category.topicsTitle}
+      </h2>
+      <ol className="mt-6 grid gap-x-6 border-t sm:grid-cols-2">
+        {category.topics.map((topic, index) => {
+          const tag = topicAnchor(topic);
+          const count = usage[tag] ?? 0;
+          return (
+            <li
+              key={topic}
+              id={tag}
+              className="flex items-baseline gap-4 border-b py-3 target:text-primary"
+            >
+              <span aria-hidden className="font-mono text-xs text-muted-foreground">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              {count > 0 ? (
+                <Link
+                  href={listingHref({ category: slug, tag })}
+                  className="flex flex-1 items-baseline justify-between gap-2 transition-colors duration-(--motion-fast) hover:text-primary"
+                >
+                  {topic}
+                  <span className="font-mono text-xs text-muted-foreground">{count}</span>
+                </Link>
+              ) : (
+                <span className="text-muted-foreground">{topic}</span>
+              )}
+            </li>
+          );
+        })}
+      </ol>
     </>
   );
 }

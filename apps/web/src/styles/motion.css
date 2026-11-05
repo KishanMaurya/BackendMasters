@@ -38,6 +38,16 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  /* Explainers: packets and highlights move between steps. Without this block, steps just change. */
+  .bm-scene-packet {
+    transition:
+      transform var(--motion-slow) var(--ease-in-out),
+      opacity var(--motion-base);
+  }
+  .bm-scene-fade {
+    transition: opacity var(--motion-base);
+  }
+
   html {
     scroll-behavior: smooth;
   }
@@ -228,5 +238,12 @@
   }
   to {
     transform: translateX(0);
+  }
+}
+
+/* The library's own edge animation runs unless told otherwise. */
+@media (prefers-reduced-motion: reduce) {
+  .bm-flow .react-flow__edge.animated path {
+    animation: none;
   }
 }

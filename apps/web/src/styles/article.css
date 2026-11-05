@@ -336,3 +336,17 @@
     display: none;
   }
 }
+
+/* React Flow's dark and light surfaces, using the site's own tokens. */
+.bm-flow .react-flow {
+  --xy-background-color: transparent;
+  --xy-edge-stroke: var(--muted-foreground);
+  --xy-edge-label-background-color: var(--card);
+  --xy-edge-label-color: var(--foreground);
+  --xy-controls-button-background-color: var(--card);
+  --xy-controls-button-background-color-hover: var(--muted);
+  --xy-controls-button-color: var(--foreground);
+  --xy-controls-button-color-hover: var(--foreground);
+  --xy-controls-button-border-color: var(--border);
+  --xy-attribution-background-color: transparent;
+}

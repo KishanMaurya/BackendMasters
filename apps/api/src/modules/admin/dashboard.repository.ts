@@ -40,18 +40,31 @@ export class DashboardRepository {
     const articles = () => client.from('articles').select('id', { count: 'exact', head: true });
     const views = () => client.from('article_views').select('id', { count: 'exact', head: true });
 
-    const [published, scheduled, drafts, featured, total, last30Days, categories, tags, recent] =
-      await Promise.all([
-        articles().eq('status', 'published').lte('published_at', nowIso),
-        articles().eq('status', 'published').gt('published_at', nowIso),
-        articles().eq('status', 'draft'),
-        articles().eq('status', 'published').eq('is_featured', true),
-        views(),
-        views().gte('viewed_at', monthAgo),
-        client.from('categories').select('id', { count: 'exact', head: true }),
-        client.from('tags').select('id', { count: 'exact', head: true }),
-        this.articles.list(admin, { page: 1, pageSize: RECENT_LIMIT }),
-      ]);
+    const [
+      published,
+      scheduled,
+      drafts,
+      featured,
+      total,
+      last30Days,
+      categories,
+      tags,
+      dsaProblems,
+      interviewQuestions,
+      recent,
+    ] = await Promise.all([
+      articles().eq('status', 'published').lte('published_at', nowIso),
+      articles().eq('status', 'published').gt('published_at', nowIso),
+      articles().eq('status', 'draft'),
+      articles().eq('status', 'published').eq('is_featured', true),
+      views(),
+      views().gte('viewed_at', monthAgo),
+      client.from('categories').select('id', { count: 'exact', head: true }),
+      client.from('tags').select('id', { count: 'exact', head: true }),
+      client.from('dsa_problems').select('id', { count: 'exact', head: true }),
+      client.from('interview_questions').select('id', { count: 'exact', head: true }),
+      this.articles.list(admin, { page: 1, pageSize: RECENT_LIMIT }),
+    ]);
 
     return {
       articles: {
@@ -63,6 +76,8 @@ export class DashboardRepository {
       views: { total: countOf(total), last30Days: countOf(last30Days) },
       categories: countOf(categories),
       tags: countOf(tags),
+      dsaProblems: countOf(dsaProblems),
+      interviewQuestions: countOf(interviewQuestions),
       recent: recent.items,
     };
   }

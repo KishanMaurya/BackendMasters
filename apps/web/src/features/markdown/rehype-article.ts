@@ -29,6 +29,12 @@ async function transformCodeBlock(pre: Element, code: Element): Promise<void> {
     return;
   }
 
+  if (languageOf(code) === 'explainer') {
+    pre.properties = { dataExplainer: source.trim() };
+    pre.children = [];
+    return;
+  }
+
   const highlighted = await highlight(source, language);
   pre.properties = {
     ...highlighted.properties,

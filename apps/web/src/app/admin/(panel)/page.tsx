@@ -22,7 +22,8 @@ export default async function DashboardPage() {
     { label: 'Featured', value: stats.articles.featured },
     { label: 'Views, 30 days', value: stats.views.last30Days },
     { label: 'Views, all time', value: stats.views.total },
-    { label: 'Categories', value: stats.categories },
+    { label: 'DSA problems', value: stats.dsaProblems },
+    { label: 'Interview questions', value: stats.interviewQuestions },
     { label: 'Tags', value: stats.tags },
   ];
 
