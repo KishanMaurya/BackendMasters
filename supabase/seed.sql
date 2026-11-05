@@ -1,5 +1,32 @@
 -- LOCAL DEVELOPMENT ONLY. Runs on `supabase db reset` and is never applied by `supabase db push`.
--- Gives the pages real rows to render during development. No user accounts are created here.
+-- Gives the pages real rows to render during development.
+--
+-- The two accounts below exist only in local databases, so their passwords are not secrets.
+-- Sign-ups are off, which is why they are inserted here. Production accounts: see docs/ADMIN.md.
+insert into auth.users (
+  instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+  raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+  confirmation_token, recovery_token, email_change, email_change_token_new
+)
+values
+  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-00000000000a',
+   'authenticated', 'authenticated', 'admin@backendmasters.test',
+   extensions.crypt('local-admin-password', extensions.gen_salt('bf')), now(),
+   '{"provider":"email","providers":["email"]}', '{"display_name":"Local Admin"}',
+   now(), now(), '', '', '', ''),
+  ('00000000-0000-0000-0000-000000000000', '10000000-0000-0000-0000-00000000000b',
+   'authenticated', 'authenticated', 'reader@backendmasters.test',
+   extensions.crypt('local-reader-password', extensions.gen_salt('bf')), now(),
+   '{"provider":"email","providers":["email"]}', '{"display_name":"Local Reader"}',
+   now(), now(), '', '', '', '');
+
+insert into auth.identities (provider_id, user_id, identity_data, provider, created_at, updated_at)
+select id::text, id, jsonb_build_object('sub', id::text, 'email', email), 'email', now(), now()
+from auth.users
+where email like '%@backendmasters.test';
+
+update public.profiles set role = 'admin' where id = '10000000-0000-0000-0000-00000000000a';
+
 
 insert into public.tags (slug, name) values
   ('caching', 'Caching'),

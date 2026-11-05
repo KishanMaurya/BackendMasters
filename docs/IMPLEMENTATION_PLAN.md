@@ -32,9 +32,9 @@ Each phase ends with: run the app, typecheck, lint, tests, fix errors, summarize
 
 ## Open questions for you
 
-None of these block Phase 1 or 2.
+None of these block the current phase.
 
-1. **Bookmarks:** the `bookmarks` table and its rules exist, but the only login specified is for admins. Do readers get accounts? If not, public sign-ups should be turned off in Phase 5.
+1. **Reader accounts:** sign-ups are off, since the only login specified is for admins. The `bookmarks` table and its rules stay in place, so reader accounts can be added later without a schema change.
 2. **Launch content:** your `interview-pdfs` books are tested Markdown and could seed DSA articles, but you sell those on Topmate. Would you publish some of it free, or should site content be separate?
 3. **API host:** needs a decision by Phase 7. Railway is the simplest choice; ECS would double as AWS content material.
 4. **Contact address:** the footer and `/about` link to your Instagram and YouTube, taken from your `interview-pdfs` brand files. Is there an email address to publish as well?

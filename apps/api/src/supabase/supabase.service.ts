@@ -1,6 +1,6 @@
 import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient, isAuthRetryableFetchError, SupabaseClient } from '@supabase/supabase-js';
 import type { DependencyStatus } from '@backendmasters/shared';
 import type { Env } from '../config/env.js';
 import type { Database } from './database.types.js';
@@ -46,6 +46,19 @@ export class SupabaseService {
     return this.build(this.publishableKey, {
       global: { headers: { Authorization: `Bearer ${accessToken}` } },
     });
+  }
+
+  /**
+   * Returns the user id of a valid access token, or null. Tokens are checked against the
+   * project's public signing keys, so this normally needs no call to Supabase. An outage
+   * throws instead, so it isn't reported to a signed-in admin as a bad token.
+   */
+  async verifyAccessToken(accessToken: string): Promise<string | null> {
+    const { data, error } = await this.publicClient.auth.getClaims(accessToken);
+    if (error && isAuthRetryableFetchError(error)) {
+      throw new ServiceUnavailableException('Sign-in could not be checked');
+    }
+    return error ? null : (data?.claims.sub ?? null);
   }
 
   async checkHealth(): Promise<DependencyStatus> {

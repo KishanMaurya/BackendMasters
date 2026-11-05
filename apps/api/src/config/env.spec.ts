@@ -4,6 +4,8 @@ const SUPABASE = {
   SUPABASE_URL: 'https://example.supabase.co',
   SUPABASE_PUBLISHABLE_KEY: 'publishable',
   SUPABASE_SECRET_KEY: 'secret',
+  WEB_REVALIDATE_URL: 'https://example.com/api/revalidate',
+  REVALIDATE_SECRET: 'x'.repeat(32),
 };
 
 describe('validateEnv', () => {
@@ -35,6 +37,10 @@ describe('validateEnv', () => {
       /SUPABASE_URL[\s\S]*SUPABASE_PUBLISHABLE_KEY[\s\S]*SUPABASE_SECRET_KEY/,
     );
     expect(validateEnv({ NODE_ENV: 'production', ...SUPABASE }).NODE_ENV).toBe('production');
+  });
+
+  it('rejects a short revalidation secret', () => {
+    expect(() => validateEnv({ REVALIDATE_SECRET: 'short' })).toThrow(/REVALIDATE_SECRET/);
   });
 
   it('never includes values in the error message', () => {

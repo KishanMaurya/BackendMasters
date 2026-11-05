@@ -20,14 +20,14 @@ flowchart LR
     storage[Storage]
   end
   web -- server-side fetch --> api
-  web -- admin sign-in only --> auth
+  web -- admin sign-in, server side only --> auth
   api -- verify JWT via JWKS --> auth
   api --> pg
   api --> storage
   api -- on publish: revalidate webhook --> web
 ```
 
-**The rule that shapes everything:** the web app talks to one backend, the NestJS API. The only Supabase call the frontend makes is admin sign-in through Supabase Auth, and that lives in a single module.
+**The rule that shapes everything:** the web app talks to one backend, the NestJS API. The only Supabase call the web app makes is admin sign-in through Supabase Auth, on the server, in `lib/supabase/server.ts` (the proxy also refreshes the session).
 
 ## 2. Repository layout
 
@@ -57,30 +57,41 @@ Each NestJS module follows `controller → service → repository`. Only reposit
 
 ## 3. Key decisions
 
-| #   | Decision                                                                                      | Why                                                                                                                                                                                           |
-| --- | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D1  | **npm workspaces + Turborepo**                                                                | No global tool to install, matches your other projects, and Vercel supports it natively.                                                                                                      |
-| D2  | **TypeScript 6.0, not 7**                                                                     | `@nestjs/swagger` (`^5.5 \|\| ^6`), `typescript-eslint` (`<6.1`) and `@nestjs/cli` (`~6.0`) don't accept 7 yet. Revisit when they do.                                                         |
-| D3  | **Public pages use Next.js Cache Components** (`use cache`, `cacheTag`, Partial Prerendering) | Next 16's form of SSG + ISR. Articles are prerendered and fast to index; unlisted slugs get rendered once, then cached.                                                                       |
-| D4  | **Publishing triggers on-demand revalidation**                                                | On publish or unpublish, the API calls a secret-protected `/api/revalidate` route that revalidates the cache tag, so changes appear in seconds without short cache lifetimes.                 |
-| D5  | **Supabase keys are scoped by purpose**                                                       | Public reads use the publishable key, so RLS applies. Admin writes forward the admin's JWT, so RLS applies again. The secret key is reserved for narrow server jobs (view counting, storage). |
-| D6  | **The API verifies JWTs locally through JWKS**                                                | No network round trip to Supabase on each request. `AdminGuard` then checks `profiles.role`.                                                                                                  |
-| D7  | **Markdown renders on the server**                                                            | `react-markdown` runs in Server Components with Shiki, so no grammar or theme reaches the browser. Only the copy button, table of contents, progress bar and Mermaid are client code.         |
-| D8  | **Markdown is always sanitized**                                                              | `rehype-sanitize` runs even though only admins author content, because a compromised admin account shouldn't become stored XSS for every reader.                                              |
-| D9  | **Search uses Postgres full-text**                                                            | A generated `tsvector` column with a GIN index, `websearch_to_tsquery` for queries, `pg_trgm` for suggestions. No extra search service to pay for or sync.                                    |
-| D10 | **Animation libraries load on demand**                                                        | CSS and SVG by default. See `DESIGN_SYSTEM.md` for the budget per library.                                                                                                                    |
-| D11 | **Validation by layer**                                                                       | `class-validator` DTOs at the API boundary (needed for Swagger), Zod for frontend forms and environment parsing.                                                                              |
+| #   | Decision                                                                                      | Why                                                                                                                                                                                   |
+| --- | --------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | **npm workspaces + Turborepo**                                                                | No global tool to install, matches your other projects, and Vercel supports it natively.                                                                                              |
+| D2  | **TypeScript 6.0, not 7**                                                                     | `@nestjs/swagger` (`^5.5 \|\| ^6`), `typescript-eslint` (`<6.1`) and `@nestjs/cli` (`~6.0`) don't accept 7 yet. Revisit when they do.                                                 |
+| D3  | **Public pages use Next.js Cache Components** (`use cache`, `cacheTag`, Partial Prerendering) | Next 16's form of SSG + ISR. Articles are prerendered and fast to index; unlisted slugs get rendered once, then cached.                                                               |
+| D4  | **Publishing triggers on-demand revalidation**                                                | When visible content changes, the API calls a secret-protected `/api/revalidate` route that revalidates the cache tag, so changes appear in seconds without short cache lifetimes.    |
+| D5  | **Supabase keys are scoped by purpose**                                                       | Public reads use the publishable key, so RLS applies. Admin writes forward the admin's JWT, so RLS applies again. The secret key is reserved for narrow server jobs (view counting).  |
+| D6  | **The API verifies JWTs locally through JWKS**                                                | No network round trip to verify a token. `AdminGuard` then checks `is_admin()`.                                                                                                       |
+| D7  | **Markdown renders on the server**                                                            | `react-markdown` runs in Server Components with Shiki, so no grammar or theme reaches the browser. Only the copy button, table of contents, progress bar and Mermaid are client code. |
+| D8  | **Markdown is always sanitized**                                                              | `rehype-sanitize` runs even though only admins author content, because a compromised admin account shouldn't become stored XSS for every reader.                                      |
+| D9  | **Search uses Postgres full-text**                                                            | A generated `tsvector` column with a GIN index, `websearch_to_tsquery` for queries, `pg_trgm` for suggestions. No extra search service to pay for or sync.                            |
+| D10 | **Animation libraries load on demand**                                                        | CSS and SVG by default. See `DESIGN_SYSTEM.md` for the budget per library.                                                                                                            |
+| D11 | **Validation by layer**                                                                       | `class-validator` DTOs at the API boundary (needed for Swagger), Zod for frontend forms and environment parsing.                                                                      |
 
 ## 4. Data access and security
 
-| Caller            | Credential            | RLS applies?  | Used for                        |
-| ----------------- | --------------------- | ------------- | ------------------------------- |
-| Public API routes | Publishable key       | Yes           | Reading published content       |
-| Admin API routes  | Admin's forwarded JWT | Yes           | Content management              |
-| Server jobs       | Secret key            | No (bypasses) | View counts, storage operations |
-| Browser           | Publishable key       | Yes           | Admin sign-in only              |
+| Caller            | Credential            | RLS applies?  | Used for                          |
+| ----------------- | --------------------- | ------------- | --------------------------------- |
+| Public API routes | Publishable key       | Yes           | Reading published content         |
+| Admin API routes  | Admin's forwarded JWT | Yes           | Content management, image uploads |
+| Server jobs       | Secret key            | No (bypasses) | View counts                       |
+| Web server        | Publishable key       | Yes           | Admin sign-in only                |
 
 Defence in depth for admin writes: `AdminGuard` rejects non-admins in the API, and RLS policies check `is_admin()` in the database. A bug in either one alone doesn't expose a write.
+
+### Admin sessions
+
+The browser never holds a usable token in script. Sign-in runs in a Server Action, and the session lives in an `httpOnly` cookie limited to `/admin`, so public pages never receive it. Server Actions and admin pages read the cookie on the server and forward the access token to the API.
+
+- **`proxy.ts` only refreshes the session.** It makes no access decisions. Redirecting there would turn a session that expired during a save into a lost edit.
+- **Server Actions are public endpoints,** so each validates its input and relies on the API's check rather than on the page having loaded.
+- **Article saves are one transaction.** The `save_article` function writes the article and its tags together, runs as the caller so RLS applies, and refuses a save based on an out-of-date version.
+- **Uploads are identified by their first bytes,** not by the name or type a client sends. SVG is refused because it can carry scripts. Files get random names.
+
+Setup and day-to-day use are in `ADMIN.md`.
 
 The secret key is never given a `NEXT_PUBLIC_` name and is never set on the Vercel project at all.
 
@@ -119,27 +130,31 @@ All tables use UUID primary keys (`article_tags` uses its two foreign keys), `cr
 
 ## 6. How article pages behave
 
-`/articles/[slug]` is a blocking route (`instant = false`), deliberately. A streamed page sends status 200 before the article is looked up, so a missing article could never return a real 404.
+`/articles/[slug]` is a blocking route (`instant = false`), so a page published after the build still arrives as complete HTML on the first visit.
 
 | Situation                    | Reader                                          | Googlebot                          |
 | ---------------------------- | ----------------------------------------------- | ---------------------------------- |
 | Article known at build       | Instant, full HTML                              | Same                               |
 | Published after the build    | First request waits for the render, then cached | Same, with complete HTML and title |
-| Missing or draft             | Not-found page, status 200, `noindex`           | Status 404                         |
+| Missing or draft, first hit  | Not-found page, status 200, `noindex`           | Same                               |
+| Missing or draft, after that | Not-found page, status 404, `noindex`           | Same                               |
 | API down, article not cached | "Couldn't be loaded" page with retry            | Status 500, so it retries later    |
 
-Two consequences to know about:
+Measured on a production build. Status 404 needs the empty result to be in the cache already, and publishing clears that cache, so a crawler can see status 200 on a missing page. `noindex` keeps that page out of search results either way.
+
+Other things to know:
 
 - `generateStaticParams` must return at least one item, so a placeholder slug is used when the API is unreachable or nothing is published. That keeps such builds from failing.
-- `use cache` results persist in `.next/cache` across builds. Publish-time revalidation (Phase 5) is what guarantees freshness. Delete that folder when testing against changed local data.
+- `use cache` results persist in `.next/cache` across builds. Delete that folder when testing against changed local data without going through the admin area.
+- **Content changes appear on the next request.** The API calls `/api/revalidate`, which expires the `content` cache tag with no stale period. Every public query carries that tag. The route's tag is fixed, so its secret can't be used for anything else.
 
 ## 7. Testing the data layer
 
-| Command            | Needs                                 | Proves                                        |
-| ------------------ | ------------------------------------- | --------------------------------------------- |
-| `npm run db:test`  | Local Supabase                        | 35 pgTAP tests of who can read and write what |
-| `npm run test:db`  | Local Supabase, seed, `apps/api/.env` | The real API against the real database        |
-| `npm run test:e2e` | Nothing                               | HTTP behaviour with repositories faked        |
+| Command            | Needs                                 | Proves                                                             |
+| ------------------ | ------------------------------------- | ------------------------------------------------------------------ |
+| `npm run db:test`  | Local Supabase                        | 46 pgTAP tests of who can read and write what                      |
+| `npm run test:db`  | Local Supabase, seed, `apps/api/.env` | The real API against the real database, signed in as real accounts |
+| `npm run test:e2e` | Nothing                               | HTTP behaviour with repositories faked                             |
 
 The pgTAP suite was mutation-tested: exposing drafts, granting role updates and disabling RLS on a table each made it fail.
 
