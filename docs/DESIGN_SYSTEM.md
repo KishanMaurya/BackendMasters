@@ -92,7 +92,7 @@ The brief lists seven tools and also says to choose the lightest fit. This is ho
 | **CSS + SVG**                | Default, no JS             | Hover, packets, grids, ambient hero, category illustrations, skeletons                                               |
 | **Motion** (`motion/react`)  | Not installed yet          | Everything in Phase 2 was achievable without it. Add it in Phase 6 if an explainer needs gesture or layout animation |
 | **React `<ViewTransition>`** | Live                       | Page crossfades, with no extra library. Browsers without support swap instantly                                      |
-| **Mermaid**                  | Phase 4, dynamic import    | Only loaded on articles containing a diagram                                                                         |
+| **Mermaid**                  | Phase 4, dynamic import    | Loaded for a diagram on the first screen, otherwise after the first scroll                                           |
 | **React Flow**               | Live, dynamic import       | Only on `/system-design`, about 60 KB, loaded when the explorer nears the screen                                     |
 | **GSAP**                     | Not installed until needed | Added only if a scroll-story explainer can't be done with Motion                                                     |
 | **Lottie**                   | Not planned                | Would need external After Effects assets; SVG/CSS covers small loaders at lower weight                               |
@@ -103,7 +103,7 @@ The brief lists seven tools and also says to choose the lightest fit. This is ho
 
 **Articles at the end of Phase 4** (same conditions): LCP 0.7s, CLS 0, 169 KB of JS. An article with a diagram also loads Mermaid (about 650 KB) after the page goes idle, with about 220ms of blocking time. It never affects articles without diagrams.
 
-**Measured at the end of Phase 7** (same conditions): LCP 0.5 to 1.3s, CLS 0.011 or less, under 40ms of blocking time. First-load JS is 161 to 167 KB on listing pages, 173 KB on articles, 178 KB on DSA problems and 181 KB on `/hld`, so some pages are still over budget. React alone accounts for about 133 KB of it. `/system-design` adds about 60 KB for React Flow once scrolled to.
+**Measured at the end of Phase 7** (same conditions): LCP 0.5 to 1.3s, CLS 0.011 or less, under 40ms of blocking time. Every public page loads 156 KB of JS or less for itself, all under budget. React alone accounts for about 133 KB of it. Next's link prefetching adds 6 to 28 KB soon after load, depending on which links are on screen, so `/learn` reaches 176 KB in total and articles 162 to 175 KB. Heavy pieces load when reached: about 14 KB for explainers, about 60 KB for React Flow on `/system-design`, and about 650 KB for Mermaid on articles with a diagram.
 
 **Class names:** `lib/utils.ts` joins classes and doesn't resolve Tailwind conflicts, which saves 15 KB on every page. If two classes conflict, remove one.
 
@@ -148,7 +148,7 @@ Load balancer, Kafka, sharding, distributed tracing, caching and sliding window,
 
 - **One frame for all of them.** `<Explainer>` provides play, pause, step and restart controls, a caption, and every step as text under "Read all steps". An explainer only supplies its captions and how to draw a step.
 - **Real logic.** `scenes.ts` holds the simulations, separate from drawing and covered by tests. The sliding window runs the same algorithm as the published problem.
-- **Nothing starts by itself.** Playback stops when the explainer leaves the screen. Each explainer is its own chunk, so a page only loads the ones it shows.
+- **Nothing starts by itself.** Playback stops when the explainer leaves the screen. Each explainer is its own chunk. The server renders it, and its code loads when it nears the screen, so a page only loads the ones a reader reaches.
 - **Usable in articles.** A fenced code block with the language `explainer` and a name inserts one. An unknown name renders nothing.
 
 ### Architecture explorer

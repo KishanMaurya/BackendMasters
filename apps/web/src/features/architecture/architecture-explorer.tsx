@@ -1,13 +1,13 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { ARCHITECTURE_NODES, connectedLabels } from './graph';
 
-const FlowCanvas = dynamic(() => import('./flow-canvas'), {
-  ssr: false,
-  loading: () => <div aria-hidden className="h-[30rem] animate-pulse rounded-xl border bg-card" />,
-});
+const FlowCanvas = lazy(() => import('./flow-canvas'));
+
+function Placeholder() {
+  return <div aria-hidden className="h-[30rem] animate-pulse rounded-xl border bg-card" />;
+}
 
 /**
  * React Flow is large, so it loads only when this nears the screen. The same content is always
@@ -40,9 +40,11 @@ export function ArchitectureExplorer() {
         behaves when it fails, and drag components to rearrange them.
       </p>
       {near ? (
-        <FlowCanvas />
+        <Suspense fallback={<Placeholder />}>
+          <FlowCanvas />
+        </Suspense>
       ) : (
-        <div aria-hidden className="h-[30rem] animate-pulse rounded-xl border bg-card" />
+        <Placeholder />
       )}
       <details className="rounded-xl border bg-card p-4 text-sm">
         <summary className="cursor-pointer font-medium">Read this architecture as text</summary>
