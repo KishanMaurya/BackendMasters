@@ -97,7 +97,7 @@ Status: **Phases 1 to 7 are built. Launch steps that need your accounts or decis
 - [x] Accessibility audit (axe, 27 pages in both themes, no violations)
 - [x] Full test pass
 - [x] Dockerfile for the API, Vercel settings, CI workflow and deployment guide (`docs/DEPLOYMENT.md`)
-- [ ] First-load JS under 170 KB on every page: listing pages are 161 to 167 KB, articles 173 KB, DSA problems 178 KB and `/hld` 181 KB
+- [x] First-load JS under 170 KB on every page: 156 KB or less for the page itself, plus up to 28 KB of link prefetching
 
 ## Launch
 

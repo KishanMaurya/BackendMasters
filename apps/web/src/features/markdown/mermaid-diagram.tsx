@@ -34,8 +34,9 @@ function isDarkTheme() {
 }
 
 /**
- * Mermaid is large, so it's imported only when a diagram nears the screen.
- * The source stays visible until then, and if a diagram can't be drawn.
+ * Mermaid is large, so it's imported only when a diagram is on screen, or nears it once the reader
+ * has started scrolling. A diagram just below the first screen doesn't cost a reader who never
+ * scrolls. The source stays visible until then, and if a diagram can't be drawn.
  */
 export function MermaidDiagram({ code }: { code: string }) {
   const id = `mermaid-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
@@ -57,8 +58,18 @@ export function MermaidDiagram({ code }: { code: string }) {
       },
       { rootMargin: '400px' },
     );
-    observer.observe(element);
-    return () => observer.disconnect();
+    const watch = () => observer.observe(element);
+
+    const onFirstScreen = element.getBoundingClientRect().top < window.innerHeight * 0.75;
+    if (onFirstScreen || window.scrollY > 0) {
+      watch();
+      return () => observer.disconnect();
+    }
+    window.addEventListener('scroll', watch, { once: true, passive: true });
+    return () => {
+      window.removeEventListener('scroll', watch);
+      observer.disconnect();
+    };
   }, []);
 
   // Redraw when the theme changes, since Mermaid bakes colours into its output.
